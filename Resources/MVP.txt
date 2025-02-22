@@ -1,0 +1,62 @@
+Minimum Viable Product: (List of what is needed by mid march and why)
+ - Login
+    - Cannot expand into anything social without it.
+ - Login Rewards
+    - Most basic and easy to implement "gamification" step.
+ - Mission Select
+    - Easy way to navigate the app. Default swing menu bar is bad.
+ - Calendar
+    - Productivity app requires a calendar.
+ - ToDo List
+    - Productivity app requires a ToDo list.
+ - Leaderboard (Local Profile)
+    - Cannot be called "gamified" without some way to view progress.
+ - Item Shop
+    - Most basic thing items can be used for.
+ - Inventory/Character customizer
+    - To have items, you need a way to view them.
+
+Logistics
+ - We will need to design each of these things
+ - We will need to standardize the look
+ - We will need an abstract class for each screen
+ - We will need some boiler plate for characters and loot items
+ - We will need a utilities class with some standard graphics components.
+ - We will need a utilities class for I/O handling, saving, and loading data.
+ - We will need an abstract class for items
+ - Perhaps we will need an application class with some hooks for when the application opens/closes, to perform standard checks.
+    - Perhaps you can toggle this into developer mode, wherein it launches with a window for our custom error messages.
+ - We will need to write test classes for backend tasks.
+ - We will need an abstract class for test classes.
+ - We will need some GitHub workflows for CI/CD that can automatically run the test cases on push.
+ - For front-end, user testing might be all we can do.
+
+Workflow (Creating a new class)
+ - Pull the latest changes from our GitHub to your local repository
+ - Create a new branch for your workflow
+ - Create the class in the src, MyClass.java, and extend the proper parent class, e.g. class MyClass extends AppWindow
+ - Create a test class which extends the Test, instantiates the object and runs your tests, and returns true if they pass, and false otherwise. Add debug messages if you desire.
+ - If your feature is front end and does not require tests, create a test class that just returns true.
+ - Git add your class, and commit to your local repository
+ - Compare your branch to our development branch
+ - Push (or merge/rebase, then push) your changes to development
+ - Send a message in #updates, so the team can begin code reviews
+ - If you need to make changes as a result of the review, make them, then retry pushing your changes to development, then send another message in #updates.
+ - Once your code has passed 2 reviews, you may CAREFULLY push to production, and CAREFULLY remove your checked out branch.
+
+Workflow (Refactoring)
+ - Follow steps above to create a new branch for your workflow.
+ - Make edits to the class/classes you're working in.
+ - Update the test cases.
+ - Push to development (merging/rebasing as needed)
+ - Send a message in #updates explaining your changes
+ - Respond to normal requests from code reviewers
+ 
+Workflow (Code reviews)
+ - If you see a message in #updates that no-one has responded to, respond to it saying you will perform the first code review
+ - Alternatively, if you see a message in #updates from a code reviewer who has reviewed code you did not originally create, respond to it saying you will perform the second code review
+ - Check the test cases, ensure everything passed, review in any other way you see necessary
+ - If everything checks out, reply again to the message saying you have completed the code review
+ - If you notice anything that should be improved, send a message to the original developer asking them to make changes and update the development branch.
+ - Once everything looks good, reply in #updates saying the review is complete
+
