@@ -1,6 +1,9 @@
 import ApplicationDefaults.*;
+import DataStructures.FileHandler;
 import WindowStates.LoginPreferences;
 import WindowStates.WindowStateName;
+
+import java.nio.file.Paths;
 
 /**
  * This is our application. It has a GUI, but isn't the gui. It runs on the main thread.
@@ -12,6 +15,7 @@ public class QuestifyApplication {
     private Thread managerThread;
     private NotifierRelay notifier;
     private boolean debugMode;
+    private FileHandler fileHandler;
     /**
      * Default constructor, debug is false. Debug gives access to debug handler
      * */
@@ -24,6 +28,9 @@ public class QuestifyApplication {
      * */
     public QuestifyApplication (boolean debugMode) {
         this.debugMode = debugMode;
+        String projectPath = Paths.get(System.getProperty("user.dir"),"resources",".").toString();
+        projectPath = projectPath.substring(0,projectPath.length()-1);
+        this.fileHandler = new FileHandler(projectPath);
     }
     /**
      * openGui Opens the ApplicationGUI, and begins the debug thread if necessary.
@@ -43,7 +50,8 @@ public class QuestifyApplication {
         }
 
         // start manager on a new thread
-        managerThread = new Thread(new WindowStateManager(gui,getAllWindowPreferences(),notifier));
+        managerThread = new Thread(new WindowStateManager(gui,getAllWindowPreferences(),
+                notifier,fileHandler));
         managerThread.start();
     }
 

@@ -1,5 +1,8 @@
 package ApplicationDefaults;
 
+import DataStructures.FileHandler;
+import WindowStates.WindowStateName;
+
 /**
  * Manager that manages the state of the GUI. Takes in events passed by the GUI, and synchronously
  * requests the GUI to respond. Runnable on a separate thread.
@@ -9,6 +12,7 @@ public class WindowStateManager implements Runnable {
     private WindowPreferences[] allWindowPreferences;
     private NotifierRelay notifier;
     private long startTime;
+    private FileHandler fileHandler;
 
     /**
      * Create manager, given a gui, preferences, and a notifier to take cues from.
@@ -17,11 +21,12 @@ public class WindowStateManager implements Runnable {
      * @param notifier notifier relay that parks and un-parks this thread. Tells manager what GUI is doing.
      * */
     public WindowStateManager (ApplicationGUI gui, WindowPreferences[] allWindowPreferences,
-                               NotifierRelay notifier) {
+                               NotifierRelay notifier, FileHandler fileHandler) {
         startTime = System.currentTimeMillis();
         this.gui = gui;
         this.allWindowPreferences = allWindowPreferences;
         this.notifier = notifier;
+        this.fileHandler = fileHandler;
     }
 
     /**
@@ -37,6 +42,15 @@ public class WindowStateManager implements Runnable {
             // this is called by closing hooks from the GUI
             if (event == WindowStateEvent.CLOSE_APP)
                 break;
+            if (event == WindowStateEvent.SWITCH_STATE) {
+                WindowStateName currentState = gui.getActiveState();
+                for (WindowPreferences preferences : allWindowPreferences) {
+                    if (preferences.getWindowStateName().equals(currentState)) {
+                        preferences.getWindowState().save(fileHandler);
+                        break;
+                    }
+                }
+            }
             if (event == WindowStateEvent.START_APP) {
                 System.out.println("Starting app");
                 WindowPreferences startPreferences = null;

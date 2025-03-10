@@ -1,3 +1,9 @@
+import DataStructures.*;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.MemoryImageSource;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 

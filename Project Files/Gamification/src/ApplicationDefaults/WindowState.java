@@ -1,5 +1,6 @@
 package ApplicationDefaults;
 
+import DataStructures.FileHandler;
 import WindowStates.WindowStateName;
 
 import javax.swing.*;
@@ -44,4 +45,13 @@ public abstract class WindowState extends JWindow {
             return;
         relay.notify(debugMessages);
     }
+
+    /**
+     * WindowStates must implement a method to save data when closed.
+     * */
+    public abstract void save (FileHandler fileHandler);
+    /**
+     * WindowStates must implement a method to load data when opened.
+     * */
+    public abstract void load (FileHandler fileHandler);
 }
