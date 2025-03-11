@@ -3,13 +3,15 @@ package ApplicationDefaults;
 import DataStructures.FileHandler;
 import WindowStates.WindowStateName;
 
+import java.util.HashMap;
+
 /**
  * Manager that manages the state of the GUI. Takes in events passed by the GUI, and synchronously
  * requests the GUI to respond. Runnable on a separate thread.
  * */
 public class WindowStateManager implements Runnable {
     private ApplicationGUI gui;
-    private WindowPreferences[] allWindowPreferences;
+    private HashMap<WindowStateName,WindowState> windowStates;
     private NotifierRelay notifier;
     private long startTime;
     private FileHandler fileHandler;
@@ -17,16 +19,22 @@ public class WindowStateManager implements Runnable {
     /**
      * Create manager, given a gui, preferences, and a notifier to take cues from.
      * @param gui the GUI that is being managed
-     * @param allWindowPreferences an array of all the WindowPreferences available to the gui.
+     * @param allWindowStates an array of all the WindowPreferences available to the gui.
      * @param notifier notifier relay that parks and un-parks this thread. Tells manager what GUI is doing.
      * */
-    public WindowStateManager (ApplicationGUI gui, WindowPreferences[] allWindowPreferences,
+    public WindowStateManager (ApplicationGUI gui, WindowState[] allWindowStates,
                                NotifierRelay notifier, FileHandler fileHandler) {
         startTime = System.currentTimeMillis();
         this.gui = gui;
-        this.allWindowPreferences = allWindowPreferences;
         this.notifier = notifier;
         this.fileHandler = fileHandler;
+        windowStates = new HashMap<>(allWindowStates.length);
+        for (WindowState windowState : allWindowStates) {
+            if (windowState == null)
+                continue;
+            windowStates.put(windowState.getStateName(),windowState);
+            windowState.attachNotifierRelay(notifier);
+        }
     }
 
     /**
@@ -40,32 +48,42 @@ public class WindowStateManager implements Runnable {
 
             // this allows thread to terminate, and prevents it from parking
             // this is called by closing hooks from the GUI
-            if (event == WindowStateEvent.CLOSE_APP)
-                break;
-            if (event == WindowStateEvent.SWITCH_STATE) {
-                WindowStateName currentState = gui.getActiveState();
-                for (WindowPreferences preferences : allWindowPreferences) {
-                    if (preferences.getWindowStateName().equals(currentState)) {
-                        preferences.getWindowState().save(fileHandler);
-                        break;
-                    }
+            if (event == WindowStateEvent.CLOSE_APP) {
+                windowStates.get(gui.getActiveState()).save(fileHandler);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
+                break;
+            }
+            if (event == WindowStateEvent.SWITCH_STATE) {
+                WindowState currentState = windowStates.get(gui.getActiveState());
+                WindowState nextState = windowStates.get(currentState.getNextWindow());
+                currentState.save(fileHandler);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                gui.takeState(nextState);
+                nextState.load(fileHandler);
             }
             if (event == WindowStateEvent.START_APP) {
                 System.out.println("Starting app");
-                WindowPreferences startPreferences = null;
-                for (WindowPreferences preferences : allWindowPreferences) {
-                    if (preferences.isStartupScreen()) {
-                        startPreferences = preferences;
+                WindowState startState = null;
+                for (WindowStateName state : windowStates.keySet()) {
+                    if (windowStates.get(state).isStartupScreen()) {
+                        startState = windowStates.get(state);
                         break;
                     }
                 }
-                if (startPreferences == null)
-                    return;
+                if (startState == null)
+                    continue;
                 System.out.println("Found window Preferences");
-                gui.takeState(startPreferences.getWindowState());
+                gui.takeState(startState);
+                startState.load(fileHandler);
             }
-
         }
     }
 }
