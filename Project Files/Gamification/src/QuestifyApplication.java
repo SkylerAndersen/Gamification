@@ -1,6 +1,7 @@
 import ApplicationDefaults.*;
 import DataStructures.FileHandler;
 import WindowStates.LoginPreferences;
+import WindowStates.MissionSelectPreferences;
 import WindowStates.WindowStateName;
 
 import java.nio.file.Paths;
@@ -67,6 +68,7 @@ public class QuestifyApplication {
 
         // initialize all window preferences
         allWindowPreferences[0] = new LoginPreferences();
+        allWindowPreferences[1] = new MissionSelectPreferences();
 //        allWindowPreferences[1] = new LoginRewardsPreferences(); // Whatever you need this to be
 //        allWindowPreferences[2] = new LeaderboardPreferences(); // Whatever you need this to be
 //        allWindowPreferences[3] = new SocialPreferences(); // Whatever you need this to be
