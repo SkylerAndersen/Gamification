@@ -11,6 +11,9 @@ import javax.swing.*;
 public abstract class WindowState extends JWindow {
     private NotifierRelay relay;
     private WindowStateName name;
+    private WindowStateName nextWindow;
+    private WindowStateEvent closeEvent;
+    private boolean isStartupScreen;
 
     /**
      * Set up state with a name.
@@ -18,6 +21,9 @@ public abstract class WindowState extends JWindow {
      * */
     public WindowState (WindowStateName name) {
         this.name = name;
+        nextWindow = null;
+        isStartupScreen = false;
+        closeEvent = WindowStateEvent.CLOSE_APP;
     }
 
     /**
@@ -44,6 +50,77 @@ public abstract class WindowState extends JWindow {
         if (relay == null)
             return;
         relay.notify(debugMessages);
+    }
+
+    /**
+     * Simply closes the WindowState. Allows GUI to choose next window state
+     * based on nextWindowState and closeEvent
+     * */
+    public void close () {
+        relay.notify(closeEvent);
+    }
+
+    /**
+     * Sets the event the manager should be notified upon at close.
+     * @param closeEvent WindowStateEvent that will be passed to the notifier relay.
+     * */
+    public void setCloseEvent (WindowStateEvent closeEvent) {
+        this.closeEvent = closeEvent;
+    }
+
+    /**
+     * Returns the event to be performed on close.
+     * @return the current WindowStateEvent associated with this WindowState
+     * */
+    public WindowStateEvent getCloseEvent () {
+        return closeEvent;
+    }
+
+    /**
+     * Get the window state these preferences apply to.
+     * @return the WindowState these preferences apply to.
+     * */
+    public WindowState getWindowState () {
+        return this;
+    }
+
+    /**
+     * Get the name of the WindowState these preferences apply to.
+     * @return WindowStateName for the WindowState these preferences apply to.
+     * */
+    public WindowStateName getWindowStateName () {
+        return name;
+    }
+
+    /**
+     * Gets the name of the nextWindow opened after this window state closes. may be null.
+     * @return WindowStateName for the window state preferred after this one closes, or null.
+     * */
+    public WindowStateName getNextWindow () {
+        return nextWindow;
+    }
+
+    /**
+     * Sets the next window to be displayed when this one closes.
+     * @param name WindowStateName of the next WindowState to be displayed.
+     * */
+    public void setNextWindow (WindowStateName name) {
+        this.nextWindow = name;
+    }
+
+    /**
+     * @return if this prefers to be the startup screen.
+     * */
+    public boolean isStartupScreen () {
+        return isStartupScreen;
+    }
+
+    /**
+     * Changes startup status of window state
+     * @param isStartupScreen if this window should be displayed on start
+     * */
+    public void setStartupScreen (boolean isStartupScreen) {
+        this.isStartupScreen = isStartupScreen;
     }
 
     /**
