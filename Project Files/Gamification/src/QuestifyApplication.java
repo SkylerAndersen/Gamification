@@ -1,12 +1,8 @@
 import ApplicationDefaults.*;
 import DataStructures.FileHandler;
-<<<<<<< HEAD
 
-=======
-import WindowStates.Leaderboard;
-import WindowStates.Login;
->>>>>>> development
-import WindowStates.WindowStateName;
+import WindowStates.*;
+import WindowStates.Character;
 
 import java.nio.file.Paths;
 
@@ -71,18 +67,16 @@ public class QuestifyApplication {
         WindowState[] allWindowStates = new WindowState[WindowStateName.values().length];
 
         // initialize all window preferences
-<<<<<<< HEAD
-        allWindowPreferences[0] = new LoginPreferences();
-        allWindowPreferences[1] = new MissionSelectPreferences();
-//        allWindowPreferences[1] = new LoginRewardsPreferences(); // Whatever you need this to be
-//        allWindowPreferences[2] = new LeaderboardPreferences(); // Whatever you need this to be
-//        allWindowPreferences[3] = new SocialPreferences(); // Whatever you need this to be
-=======
+
+
         allWindowStates[0] = new Login();
         allWindowStates[1] = new Leaderboard();
+        allWindowStates[2] = new ToDos();
+        allWindowStates[3] = new Character();
+        allWindowStates[4] = new MissionSelect();
 //        allWindowStates[2] = new LoginRewards(); // Whatever you need this to be
 //        allWindowStates[3] = new Social(); // Whatever you need this to be
->>>>>>> development
+
 
         return allWindowStates;
     }

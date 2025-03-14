@@ -33,6 +33,7 @@ public class Login extends WindowState {
         JLabel label = new JLabel("HELLO WORLD!");
         getContentPane().add(label,BorderLayout.CENTER);
 
+
         /* create a timer to trigger switching the window state
         usually, this will probably be a button or something else.
         */
@@ -41,7 +42,11 @@ public class Login extends WindowState {
 
         // setup behavior telling app how to switch
         setCloseEvent(WindowStateEvent.SWITCH_STATE);
-        setNextWindow(WindowStateName.LEADERBOARD);
+        setNextWindow(WindowStateName.MISSION_SELECT);
+
+
+
+
     }
 
     @Override

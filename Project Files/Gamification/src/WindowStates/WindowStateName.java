@@ -11,5 +11,6 @@ public enum WindowStateName {
     TODOS,
     LEADERBOARD,
     ITEM_SHOP,
+    CHARACTER,
     INVENTORY;
 }
