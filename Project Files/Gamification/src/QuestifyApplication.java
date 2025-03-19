@@ -67,14 +67,12 @@ public class QuestifyApplication {
         WindowState[] allWindowStates = new WindowState[WindowStateName.values().length];
 
         // initialize all window preferences
-
-
         allWindowStates[0] = new Login();
         allWindowStates[1] = new Leaderboard();
         allWindowStates[2] = new ToDos();
         allWindowStates[3] = new Character();
         allWindowStates[4] = new MissionSelect();
-//        allWindowStates[2] = new LoginRewards(); // Whatever you need this to be
+        allWindowStates[5] = new Calendar();
 //        allWindowStates[3] = new Social(); // Whatever you need this to be
 
 
