@@ -20,7 +20,7 @@ public class Login extends WindowState {
 
     public Login () {
         super(WindowStateName.LOGIN);
-        super.setStartupScreen(true); // Initialize the app to this screen
+        super.setStartupScreen(false); // Initialize the app to this screen
 
         JFrame frame = new JFrame("Login");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
