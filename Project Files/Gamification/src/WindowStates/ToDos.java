@@ -116,6 +116,23 @@ public class ToDos extends WindowState {
         gbc.anchor = GridBagConstraints.CENTER;
         getContentPane().add(buttonPanel, gbc);
 
+        //functionality for the buttons
+        addButton.addActionListener(e -> AddTask());
+        removeButton.addActionListener(e -> RemoveTask());
+
+        /**
+         * Button for going back to main menu
+         * */
+
+        JButton missionSelectButton = new JButton("Back to Mission Select");
+        buttonPanel.add(missionSelectButton);
+        missionSelectButton.addActionListener(e -> {
+            setCloseEvent(WindowStateEvent.SWITCH_STATE);
+            setNextWindow(WindowStateName.MISSION_SELECT);
+            close();
+        });
+
+
 
         /**
         * Finished task section
@@ -147,9 +164,7 @@ public class ToDos extends WindowState {
         gbc.weighty = 1;
         getContentPane().add(scrollPane2, gbc);
 
-        //functionality for the buttons
-        addButton.addActionListener(e -> AddTask());
-        removeButton.addActionListener(e -> RemoveTask());
+
     }
 
     // mission class creates variables for adding and removing mission
