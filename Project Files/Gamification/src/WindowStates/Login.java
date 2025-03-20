@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.nio.file.Paths;
 import java.security.MessageDigest; // Used for computing message digests (a fixed length hash value)
 import java.security.NoSuchAlgorithmException;
 
@@ -22,11 +23,17 @@ public class Login extends WindowState {
         super(WindowStateName.LOGIN);
         super.setStartupScreen(true); // Initialize the app to this screen
 
-        JFrame frame = new JFrame("Login");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 1000); // Set initial size when opened
+        // I removed the JFrame since this WindowState is already a JWindow, and needs to be adopted by our JFrame
+        // I also removed the EXIT_ON_CLOSE as this would forcefully terminate without letting our exit hooks
+        // ensure that every thread properly closes, and all data is properly saved.
+        setTitle("Login");
+//        getContentPane().setSize(1000, 1000); // Set initial size when opened [Note: This won't change the size
+//                                                because the WindowState is adopted by a different JFrame and I
+//                                                didn't want the application to be reliant on variable
+//                                                WindowStates. A method could be added that keeps track of the
+//                                                window's requested size and managers that if this is desired.]
 
-        frame.setLayout(new GridBagLayout()); // GridBagLayout in order to have more precision when placing components
+        getContentPane().setLayout(new GridBagLayout()); // GridBagLayout in order to have more precision when placing components
         GridBagConstraints gbc = new GridBagConstraints();
 
         // LOGIN SCREEN
@@ -40,7 +47,7 @@ public class Login extends WindowState {
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         title.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(title, gbc);
+        getContentPane().add(title, gbc);
 
         Font labelFont = new Font("Helvetica", Font.ITALIC, 15);
 
@@ -51,7 +58,7 @@ public class Login extends WindowState {
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         usernameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(usernameLabel, gbc);
+        getContentPane().add(usernameLabel, gbc);
 
         JTextField usernameField = new JTextField(); // Login username text field
         usernameField.setColumns(30);
@@ -59,13 +66,13 @@ public class Login extends WindowState {
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         usernameField.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(usernameField, gbc);
+        getContentPane().add(usernameField, gbc);
 
         JLabel empty = new JLabel(" "); // Spacing between the username section and password section
         empty.setBorder(new EmptyBorder(5, 0, 5, 0));
         gbc.gridx = 0;
         gbc.gridy = 3;
-        frame.add(empty, gbc);
+        getContentPane().add(empty, gbc);
 
         JLabel passwordLabel = new JLabel("Password:"); // Login password label
         passwordLabel.setFont(labelFont);
@@ -74,14 +81,14 @@ public class Login extends WindowState {
         gbc.gridy = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         passwordLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(passwordLabel, gbc);
+        getContentPane().add(passwordLabel, gbc);
 
         JPasswordField passwordField = new JPasswordField(30); // Login password field
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
         passwordField.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(passwordField, gbc);
+        getContentPane().add(passwordField, gbc);
 
         // Setup behavior telling the app how to switch between screens
         setCloseEvent(WindowStateEvent.SWITCH_STATE);
@@ -95,7 +102,7 @@ public class Login extends WindowState {
                 String password = new String(passwordField.getPassword());
                 // Ensure that something is entered for both the username and password
                 if (username.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Both fields are required.");
+                    JOptionPane.showMessageDialog(getContentPane(), "Both fields are required.");
                     return;
                 }
                 // Authenticate using the UserDatabase class
@@ -103,13 +110,13 @@ public class Login extends WindowState {
                 if (isAuthenticated) {
                     close(); // If the username and password are both valid, then the next screen is opened
                 } else {
-                    JOptionPane.showMessageDialog(frame, "Invalid username or password."); // Error message if the username and/or password are invalid
+                    JOptionPane.showMessageDialog(getContentPane(), "Invalid username or password."); // Error message if the username and/or password are invalid
                 }
             }
         });
         gbc.gridx = 0;
         gbc.gridy = 6;
-        frame.add(loginButton, gbc);
+        getContentPane().add(loginButton, gbc);
 
         // SIGN UP SCREEN
 
@@ -119,7 +126,7 @@ public class Login extends WindowState {
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         signUpUsernameField.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(signUpUsernameField, gbc);
+        getContentPane().add(signUpUsernameField, gbc);
         signUpUsernameField.setVisible(false); // Initially invisible until the to-sign-up button is pressed
 
         JTextField signUpPasswordField = new JTextField(); // Signup password text field
@@ -128,13 +135,13 @@ public class Login extends WindowState {
         gbc.gridy = 5;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         signUpPasswordField.setHorizontalAlignment(SwingConstants.CENTER);
-        frame.add(signUpPasswordField, gbc);
+        getContentPane().add(signUpPasswordField, gbc);
         signUpPasswordField.setVisible(false); // Initially invisible until the to-sign-up button is pressed
 
         JButton signUpButton = new JButton("Sign Up"); // Signup button
         gbc.gridx = 0;
         gbc.gridy = 6;
-        frame.add(signUpButton, gbc);
+        getContentPane().add(signUpButton, gbc);
         signUpButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String newUsername = new String(signUpUsernameField.getText());
@@ -154,7 +161,7 @@ public class Login extends WindowState {
         JButton toSignupButton = new JButton("Don't have an account? Sign up now."); // Sign up trigger button
         gbc.gridx = 0;
         gbc.gridy = 7;
-        frame.add(toSignupButton, gbc);
+        getContentPane().add(toSignupButton, gbc);
         toSignupButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Modifies visibility to switch from  log in screen to sign up screen
@@ -167,14 +174,11 @@ public class Login extends WindowState {
                 signUpButton.setVisible(true);
             }
         });
-        frame.setVisible(true);
+        getContentPane().setVisible(true);
     }
 
     @Override
-    public void save(FileHandler fileHandler) {
-        // saving some data
-        fileHandler.save("4",10);
-    }
+    public void save(FileHandler fileHandler) {}
 
     @Override
     public void load(FileHandler fileHandler) {}
@@ -197,7 +201,8 @@ public class Login extends WindowState {
     }
 
     public class UserDatabase {
-        private static final String DATABASE_FILE = "/Users/mirandabecker/Desktop/SDSU Documents/Spring 2025/CS 250/Gamification/Project Files/Gamification/src/WindowStates/user_database.bin";  // The binary file to store user data
+        private static final String DATABASE_FILE = Paths.get(System.getProperty("user.dir"),"resources",
+                "user_database.bin").toString();
         public static void addEntry(String newUsername, String newPassword) { // Add a new entry to the binary file
             // Check if the user already exists by reading the existing database
             if (containsUser(newUsername)) {
