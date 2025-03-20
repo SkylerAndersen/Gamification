@@ -14,6 +14,7 @@ public abstract class WindowState extends JWindow {
     private WindowStateName nextWindow;
     private WindowStateEvent closeEvent;
     private boolean isStartupScreen;
+    private String title;
 
     /**
      * Set up state with a name.
@@ -24,6 +25,7 @@ public abstract class WindowState extends JWindow {
         nextWindow = null;
         isStartupScreen = false;
         closeEvent = WindowStateEvent.CLOSE_APP;
+        title = "Questify ToDo";
     }
 
     /**
@@ -122,6 +124,23 @@ public abstract class WindowState extends JWindow {
     public void setStartupScreen (boolean isStartupScreen) {
         this.isStartupScreen = isStartupScreen;
     }
+
+    /**
+     * Set the title of the window in the top bar of the JFrame, where you drag the window.
+     * @param title the new title to be taken on by the application.
+     * */
+    public void setTitle (String title) {
+        this.title = title;
+    }
+
+    /**
+     * Get the title the WindowState wants for the top bar of the JFrame, where you drag the window.
+     * @return the requested title to be taken on by the application.
+     * */
+    public String getTitle () {
+        return this.title;
+    }
+
 
     /**
      * WindowStates must implement a method to save data when closed.

@@ -6,6 +6,8 @@ import DataStructures.FileHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MissionSelect extends WindowState {
 
@@ -24,29 +26,60 @@ public class MissionSelect extends WindowState {
         getContentPane().add(missionPanel, BorderLayout.CENTER);
 
         JButton character = new JButton("Character");
-        character.addActionListener(e -> {
-            setCloseEvent(WindowStateEvent.SWITCH_STATE);
-            setNextWindow(WindowStateName.CHARACTER);
-            close();
+        character.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setCloseEvent(WindowStateEvent.SWITCH_STATE);
+                setNextWindow(WindowStateName.CHARACTER);
+                close();
+            }
         });
 
         JButton toDo = new JButton("To-Do");
-        toDo.addActionListener(e -> {
-            setCloseEvent(WindowStateEvent.SWITCH_STATE);
-            setNextWindow(WindowStateName.TODOS);
-            close();
+        toDo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setCloseEvent(WindowStateEvent.SWITCH_STATE);
+                setNextWindow(WindowStateName.TODOS);
+                close();
+            }
         });
 
         JButton leaderboard = new JButton("Leaderboard");
-        leaderboard.addActionListener(e -> {
-            setCloseEvent(WindowStateEvent.SWITCH_STATE);
-            setNextWindow(WindowStateName.LEADERBOARD);
-            close();
+        leaderboard.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setCloseEvent(WindowStateEvent.SWITCH_STATE);
+                setNextWindow(WindowStateName.LEADERBOARD);
+                close();
+            }
+        });
+
+        JButton itemShop = new JButton("Item Shop");
+        itemShop.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setCloseEvent(WindowStateEvent.SWITCH_STATE);
+                setNextWindow(WindowStateName.ITEM_SHOP);
+                close();
+            }
+        });
+
+        JButton calendar = new JButton("Calendar");
+        calendar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setCloseEvent(WindowStateEvent.SWITCH_STATE);
+                setNextWindow(WindowStateName.CALENDAR);
+                close();
+            }
         });
 
         missionPanel.add(character);
         missionPanel.add(leaderboard);
         missionPanel.add(toDo);
+        missionPanel.add(itemShop);
+        missionPanel.add(calendar);
 
 
 

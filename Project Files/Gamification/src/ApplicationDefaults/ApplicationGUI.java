@@ -79,5 +79,6 @@ public class ApplicationGUI {
         frame.setContentPane(state.getContentPane());
         frame.setVisible(true);
         activeState = state.getStateName();
+        frame.setTitle(state.getTitle());
     }
 }

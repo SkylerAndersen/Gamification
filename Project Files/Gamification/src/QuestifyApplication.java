@@ -17,6 +17,7 @@ public class QuestifyApplication {
     private NotifierRelay notifier;
     private boolean debugMode;
     private FileHandler fileHandler;
+    private ApplicationGUI gui;
     /**
      * Default constructor, debug is false. Debug gives access to debug handler
      * */
@@ -38,7 +39,7 @@ public class QuestifyApplication {
      * */
     public void openGui () {
         notifier = new NotifierRelay(debugMode);
-        ApplicationGUI gui = new ApplicationGUI(notifier);
+        gui = new ApplicationGUI(notifier);
 
         // start gui on a new thread
         guiThread = new Thread(gui::start);
@@ -67,14 +68,13 @@ public class QuestifyApplication {
         WindowState[] allWindowStates = new WindowState[WindowStateName.values().length];
 
         // initialize all window preferences
-
-
         allWindowStates[0] = new Login();
-        allWindowStates[1] = new Leaderboard();
+        allWindowStates[1] = new Leaderboard(gui.getFrame());
         allWindowStates[2] = new ToDos();
         allWindowStates[3] = new Character();
         allWindowStates[4] = new MissionSelect();
-//        allWindowStates[2] = new LoginRewards(); // Whatever you need this to be
+        allWindowStates[5] = new Calendar(gui.getFrame());
+        allWindowStates[6] = new ItemShop(gui.getFrame());
 //        allWindowStates[3] = new Social(); // Whatever you need this to be
 
 
