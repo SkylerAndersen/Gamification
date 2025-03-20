@@ -1,6 +1,7 @@
 package WindowStates;
 
 import ApplicationDefaults.WindowState;
+import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
 
 import javax.swing.*;
@@ -19,11 +20,25 @@ public class Character extends WindowState {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.BOTH; // Expands components to fill space
 
+
+        //button for going back to main menu
+        JButton missionSelectButton = new JButton("Back to Mission Select");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridheight = 1;
+        gbc.gridwidth = 1;
+        getContentPane().add(missionSelectButton, gbc);
+        missionSelectButton.addActionListener(e -> {
+            setCloseEvent(WindowStateEvent.SWITCH_STATE);
+            setNextWindow(WindowStateName.MISSION_SELECT);
+            close();
+        });
+
         //TOP SECTION - CHARACTER DISPLAY
         JPanel characterPanel = new JPanel();
         characterPanel.setPreferredSize(new Dimension(500, 300));
         characterPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        gbc.gridx = 0;
+        gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.weighty = 0.6;
@@ -37,13 +52,13 @@ public class Character extends WindowState {
         // ITEMS LABEL
         JLabel itemLabel = new JLabel("Items");
         itemLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        gbc.gridx = 0;
+        gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         getContentPane().add(itemLabel, gbc);
 
-        // ✅ BOTTOM SECTION - ITEM SELECTION
+        // BOTTOM SECTION - ITEM SELECTION
         JPanel itemPanel = new JPanel(new GridBagLayout());
         itemPanel.setPreferredSize(new Dimension(500, 200));
         itemPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
