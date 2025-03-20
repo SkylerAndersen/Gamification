@@ -21,7 +21,7 @@ public class Login extends WindowState {
 
     public Login () {
         super(WindowStateName.LOGIN);
-        super.setStartupScreen(false); // Initialize the app to this screen
+        super.setStartupScreen(true); // Initialize the app to this screen
 
         // I removed the JFrame since this WindowState is already a JWindow, and needs to be adopted by our JFrame
         // I also removed the EXIT_ON_CLOSE as this would forcefully terminate without letting our exit hooks

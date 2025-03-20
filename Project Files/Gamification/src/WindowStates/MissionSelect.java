@@ -14,7 +14,6 @@ public class MissionSelect extends WindowState {
 
     public MissionSelect () {
         super(WindowStateName.MISSION_SELECT);
-        super.setStartupScreen(true); // Initialize the app to this screen
 
 
         JPanel headerPanel = new JPanel();
