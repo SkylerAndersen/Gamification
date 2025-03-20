@@ -141,6 +141,14 @@ public abstract class WindowState extends JWindow {
         return this.title;
     }
 
+    /**
+     * An overridable method that runs if escape is pressed and if the window state is attached
+     * to a UserInputListener.
+     * */
+    public void onEscapePressed () {
+
+    }
+
 
     /**
      * WindowStates must implement a method to save data when closed.

@@ -89,7 +89,12 @@ public class MissionSelect extends WindowState {
 
 
 
-
+    @Override
+    public void onEscapePressed () {
+        System.out.println("Detected");
+        setCloseEvent(WindowStateEvent.CLOSE_APP);
+        close();
+    }
 
     @Override
     public void save(FileHandler fileHandler) {

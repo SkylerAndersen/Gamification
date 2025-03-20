@@ -174,7 +174,13 @@ public class Login extends WindowState {
                 signUpButton.setVisible(true);
             }
         });
-        getContentPane().setVisible(true);
+//        getContentPane().setVisible(true);
+    }
+
+    @Override
+    public void onEscapePressed () {
+        setCloseEvent(WindowStateEvent.CLOSE_APP);
+        close();
     }
 
     @Override

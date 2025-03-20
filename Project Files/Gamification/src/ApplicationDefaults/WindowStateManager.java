@@ -55,6 +55,7 @@ public class WindowStateManager implements Runnable {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                gui.close();
                 break;
             }
             if (event == WindowStateEvent.SWITCH_STATE) {

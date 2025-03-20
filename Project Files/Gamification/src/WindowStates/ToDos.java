@@ -1,6 +1,7 @@
 package WindowStates;
 
 import ApplicationDefaults.WindowState;
+import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
 
 import javax.swing.*;
@@ -249,6 +250,13 @@ public class ToDos extends WindowState {
             playerXP.addXp(task.getXp());
             xpLabel.setText("XP: " + playerXP.getXp() + " / 1000 | Level: " + playerXP.getLevel());
         }
+    }
+
+    @Override
+    public void onEscapePressed () {
+        setNextWindow(WindowStateName.MISSION_SELECT);
+        setCloseEvent(WindowStateEvent.SWITCH_STATE);
+        close();
     }
 
     @Override

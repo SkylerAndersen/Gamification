@@ -212,6 +212,14 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
 
         return label;
     }
+
+    @Override
+    public void onEscapePressed () {
+        setNextWindow(WindowStateName.MISSION_SELECT);
+        setCloseEvent(WindowStateEvent.SWITCH_STATE);
+        close();
+    }
+
     @Override
     public void save(FileHandler fileHandler) {
 

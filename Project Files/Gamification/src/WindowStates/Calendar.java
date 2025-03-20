@@ -225,6 +225,13 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
     }
 
     @Override
+    public void onEscapePressed () {
+        setNextWindow(WindowStateName.MISSION_SELECT);
+        setCloseEvent(WindowStateEvent.SWITCH_STATE);
+        close();
+    }
+
+    @Override
     public void save(FileHandler fileHandler) {
 
     }

@@ -77,7 +77,6 @@ public class QuestifyApplication {
         allWindowStates[6] = new ItemShop(gui.getFrame());
 //        allWindowStates[3] = new Social(); // Whatever you need this to be
 
-
         return allWindowStates;
     }
 }

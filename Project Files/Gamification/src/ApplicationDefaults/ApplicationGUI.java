@@ -14,13 +14,15 @@ public class ApplicationGUI {
     private NotifierRelay debug;
     private JFrame frame;
     private WindowStateName activeState;
+    private UserInputListener inputListener;
     /**
      * Setup the object with a notifier for multithreaded communication, but don't create the JFrame.
      * @param notifier multithreaded notifier that can communicate with DebugHandler and WindowStateManager.
      * */
     public ApplicationGUI (NotifierRelay notifier) {
         this.debug = notifier;
-        frame = null;
+        this.frame = null;
+        this.inputListener = new UserInputListener();
     }
 
     /**
@@ -78,7 +80,19 @@ public class ApplicationGUI {
         System.out.println("Taking state: " + state.getStateName().name());
         frame.setContentPane(state.getContentPane());
         frame.setVisible(true);
+        frame.getContentPane().addKeyListener(inputListener);
+        frame.getContentPane().requestFocusInWindow();
+        frame.addKeyListener(inputListener);
         activeState = state.getStateName();
         frame.setTitle(state.getTitle());
+        inputListener.setWindowState(state);
+    }
+
+    /**
+     * When called, forces GUI to close.
+     * */
+    public synchronized void close () {
+        frame.setVisible(false);
+        frame.dispose();
     }
 }
