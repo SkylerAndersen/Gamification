@@ -3,6 +3,7 @@ package WindowStates;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
+import DataStructures.PlayerData;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -108,6 +109,9 @@ public class Login extends WindowState {
                 // Authenticate using the UserDatabase class
                 boolean isAuthenticated = UserDatabase.authenticate(username, password);
                 if (isAuthenticated) {
+
+                    PlayerData.currentUser = username; //when authenticated, tells player data what data to call
+
                     close(); // If the username and password are both valid, then the next screen is opened
                 } else {
                     JOptionPane.showMessageDialog(getContentPane(), "Invalid username or password."); // Error message if the username and/or password are invalid
@@ -148,6 +152,8 @@ public class Login extends WindowState {
                 String newPassword = new String(signUpPasswordField.getText());
                 UserDatabase.addEntry(newUsername, newPassword); // Adds an entry to the hash map in UserDatabase used to store username and passwords
                 // Modifies visibility to switch from sign up screen back to log in screen
+
+                PlayerData.currentUser = newUsername;
                 usernameField.setVisible(true);
                 passwordField.setVisible(true);
                 loginButton.setVisible(true);

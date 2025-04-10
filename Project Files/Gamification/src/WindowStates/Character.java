@@ -114,7 +114,9 @@ public class Character extends WindowState {
     public void save(FileHandler fileHandler) {}
 
     @Override
-    public void load(FileHandler fileHandler) {}
+    public void load(FileHandler fileHandler) {
+
+    }
 }
 
 
