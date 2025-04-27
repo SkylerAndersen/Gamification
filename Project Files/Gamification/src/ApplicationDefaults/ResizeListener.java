@@ -64,10 +64,10 @@ public class ResizeListener extends ComponentAdapter {
         int offY = offsetY >= 0 ? offsetY : parent.getHeight()+offsetY;
 
         if (!ignoreY)
-            panel.setBounds(offX+translateX,offY+translateY,parent.getWidth()-offX-xCrop,
-                    parent.getHeight()-offY-yCrop);
+            panel.setBounds(offX+translateX,offY+translateY,parent.getWidth()-offX-translateX-xCrop,
+                    parent.getHeight()-offY-translateY-yCrop);
         else
-            panel.setBounds(offX+translateX,offY+translateY,parent.getWidth()-offX-xCrop,
+            panel.setBounds(offX+translateX,offY+translateY,parent.getWidth()-offX-translateX-xCrop,
                     panel.getHeight());
         panel.repaint();
         panel.revalidate();

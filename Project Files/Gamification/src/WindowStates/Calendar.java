@@ -5,12 +5,17 @@ import DataStructures.FileHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.util.Locale;
 
 public class Calendar extends WindowState implements AcceptMouseResponse {
     private JPanel popup;
     private boolean popupOpen;
     private MouseController mouseController;
     private JFrame parentFrame;
+    private java.util.Calendar calendar;
+    private BevelPanel calendarBody;
+    private JLabel dateLabel;
     public Calendar (JFrame parentFrame) {
         // setup frame
         super(WindowStateName.CALENDAR);
@@ -36,34 +41,74 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         mouseController = new MouseController(this);
         parentFrame.addMouseListener(mouseController.getMouseListener());
         parentFrame.addMouseMotionListener(mouseController.getMouseMotionListener());
+
+        // setup calendar with current date, then adjust UI
+        calendar = java.util.Calendar.getInstance();
+        updateUI();
+    }
+
+    private void updateUI () {
+        // gather information about what the calendar should look like
+        int day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+        String month = calendar.getDisplayName(java.util.Calendar.MONTH,java.util.Calendar.LONG,
+                new Locale("en"));
+        int monthNum = calendar.get(java.util.Calendar.MONTH);
+        int year = calendar.get(java.util.Calendar.YEAR);
+
+        calendar.set(java.util.Calendar.DAY_OF_MONTH,1);
+        int offset = calendar.get(java.util.Calendar.DAY_OF_WEEK)-1;
+        int daysInMonth = calendar.getActualMaximum(java.util.Calendar.DAY_OF_MONTH);
+
+        calendar.set(java.util.Calendar.MONTH,calendar.get(java.util.Calendar.MONTH)-1);
+        int firstDayOfLastMonth = calendar.getActualMaximum(java.util.Calendar.DAY_OF_MONTH)-(offset-1);
+        int lastMonthNum = calendar.get(java.util.Calendar.MONTH);
+        int yearOfLastMonth = calendar.get(java.util.Calendar.YEAR);
+
+        // create a list of dates in "mm-dd-yy" format and a list of the days
+        int[] days = new int[42];
+        String[] dates = new String[42];
+        for (int i = 0; i < offset; i++) {
+            days[i] = firstDayOfLastMonth+i;
+            dates[i] = (lastMonthNum > 9 ? ""+lastMonthNum : "0"+lastMonthNum)+(days[i] > 9 ? "-"+days[i] :
+                    "-0"+days[i])+"-"+yearOfLastMonth;
+        }
+        for (int i = 1; i <= daysInMonth; i++) {
+            days[i-1+offset] = i;
+            dates[i-1+offset] = (monthNum > 9 ? ""+monthNum : "0"+monthNum)+(i > 9 ? "-"+i : "-0"+i)+"-"+year;
+        }
+        int currentDay = 1;
+        for (int i = daysInMonth+offset; i < 42; i++) {
+            days[i] = currentDay++;
+            dates[i] = (monthNum > 9 ? ""+monthNum : "0"+monthNum)+(days[i] > 9 ? "-"+days[i] : "-0"+days[i])+"-"+year;
+        }
+
+        // set calendar days
+        calendarBody.removeAll();
+        calendarBody.setLayout(new GridLayout(6,7));
+        for (int currDay : days) {
+            calendarBody.add(setupDay(currDay));
+        }
+
+        // set overall date
+        dateLabel.setText(month + " " + day + ", " + year);
+        repaint();
+        revalidate();
+
+        // reset calendar object
+        calendar.set(year,monthNum,day);
     }
 
     public void onDrag (int x, int y) {}
 
-    public void onRightClick (int x, int y) {
-        popupOpen = true;
-        popup.setBounds(x,y,popup.getWidth(),popup.getHeight());
-        add(popup,0);
-        repaint();
-        revalidate();
-    }
+    public void onRightClick (int x, int y) {}
 
-    public void onLeftClick (int x, int y) {
-        boolean outsideXRange = x < popup.getX() || x > popup.getX()+popup.getWidth();
-        boolean outsideYRange = y+30 < popup.getY() || y > popup.getY()+30+popup.getHeight();
-        if (outsideYRange || outsideXRange) {
-            popupOpen = false;
-            remove(popup);
-            repaint();
-            revalidate();
-        }
-    }
+    public void onLeftClick (int x, int y) {}
 
     public JPanel setupUI () {
         JPanel background = new JPanel();
         JPanel topBar = new JPanel();
         JPanel topBarContent = new JPanel();
-        JLabel date = new JLabel();
+        dateLabel = new JLabel();
         JPanel dateSeekingButtons = new JPanel();
         JLabel lastMonthButton = new JLabel();
         JLabel nextMonthButton = new JLabel();
@@ -72,7 +117,7 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         JLabel[] daysOfTheWeek = new JLabel[7];
         for (int i = 0; i < daysOfTheWeek.length; i++)
             daysOfTheWeek[i] = new JLabel();
-        BevelPanel calendarBody = new BevelPanel();
+        calendarBody = new BevelPanel();
         JPanel spacer = new JPanel();
 
         // setup background
@@ -97,10 +142,10 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         topBar.add(topBarContent);
 
         // setup date
-        date.setText("March 11, 2025");
-        date.setForeground(new Color(116,116,116));
-        date.setFont(new Font("Helvetica",Font.PLAIN,48));
-        topBarContent.add(date,BorderLayout.WEST);
+        dateLabel.setText("March 11, 2025");
+        dateLabel.setForeground(new Color(116,116,116));
+        dateLabel.setFont(new Font("Helvetica",Font.PLAIN,48));
+        topBarContent.add(dateLabel,BorderLayout.WEST);
 
         // setup date-seeking buttons panel
         dateSeekingButtons.setBackground(topBarContent.getBackground());
@@ -122,6 +167,16 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         lastMonthButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         lastMonthButton.setVerticalAlignment(SwingConstants.CENTER);
         lastMonthButton.setHorizontalAlignment(SwingConstants.CENTER);
+        lastMonthButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                java.util.Calendar cal = Calendar.this.calendar;
+                int month = java.util.Calendar.MONTH;
+                cal.set(month,(cal.get(month)-2) % 12 + 1);
+                Calendar.this.updateUI();
+                System.out.println("PREVIOUS");
+            }
+        });
         dateSeekingButtons.add(lastMonthButton,BorderLayout.WEST);
         nextMonthButton.setText(">");
         nextMonthButton.setForeground(new Color(140,140,140));
@@ -133,6 +188,16 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         nextMonthButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         nextMonthButton.setVerticalAlignment(SwingConstants.CENTER);
         nextMonthButton.setHorizontalAlignment(SwingConstants.CENTER);
+        nextMonthButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                java.util.Calendar cal = Calendar.this.calendar;
+                int month = java.util.Calendar.MONTH;
+                cal.set(month,cal.get(month) % 12 + 1);
+                Calendar.this.updateUI();
+                System.out.println("NEXT");
+            }
+        });
         dateSeekingButtons.add(nextMonthButton,BorderLayout.EAST);
 
         // setup calendar
@@ -159,7 +224,7 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         String[] abbrevDay = {"SUN","MON","TUE","WED","THU","FRI","SAT"};
         for (int i = 0; i < daysOfTheWeek.length; i++) {
             daysOfTheWeek[i].setFont(new Font("Helvetica", Font.BOLD,24));
-            daysOfTheWeek[i].setForeground(date.getForeground());
+            daysOfTheWeek[i].setForeground(dateLabel.getForeground());
             daysOfTheWeek[i].setText(abbrevDay[i]);
             daysOfTheWeek[i].setHorizontalAlignment(SwingConstants.CENTER);
             calendarHeader.add(daysOfTheWeek[i]);
@@ -209,6 +274,27 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         bevelPanel.setRoundBottom(true);
         bevelPanel.setRoundTop(true);
         bevelPanel.setBackground(panel.getBackground());
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                bevelPanel.setBackground(new Color(panel.getBackground().getRed()-10,
+                        panel.getBackground().getGreen()-10,
+                        panel.getBackground().getBlue()-10));
+                bevelPanel.repaint();
+                Timer timer = new Timer(1000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        bevelPanel.setBackground(new Color(panel.getBackground().getRed(),
+                                panel.getBackground().getGreen(),
+                                panel.getBackground().getBlue()));
+                        bevelPanel.repaint();
+                    }
+                });
+                timer.setRepeats(false);
+                timer.start();
+                System.out.println("CLICK");
+            }
+        });
 
         label.setForeground(new Color(116,116,116));
         label.setFont(new Font("Helvetica",Font.PLAIN,24));

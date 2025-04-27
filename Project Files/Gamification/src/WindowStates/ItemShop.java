@@ -2,10 +2,14 @@ package WindowStates;
 
 import ApplicationDefaults.*;
 import DataStructures.FileHandler;
+import DataStructures.GenericItem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 public class ItemShop extends WindowState implements AcceptMouseResponse {
     private JPanel popup;
@@ -16,6 +20,13 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
     private JPanel cart;
     private JFrame parentFrame;
     private JPanel background;
+    private JPanel row;
+    private JPanel row2;
+    private ResizeListener rowResize;
+    private ResizeListener rowResize2;
+    private boolean shopView;
+    private ArrayList<GenericItem> cartItems;
+
     public ItemShop(JFrame parentFrame) {
         // setup frame
         super(WindowStateName.ITEM_SHOP);
@@ -31,6 +42,9 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         popupOpen = false;
 
         // setup UI
+        shopView = true;
+        cartItems = new ArrayList<>();
+        cartItems.add(new GenericItem());
         background = setupUI();
 
         // setup bounds and add items
@@ -71,8 +85,8 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         JLabel headerlabel = new JLabel();
         JPanel coins = setupCoins(244);
         JPanel contentLayer = new JPanel();
-        JPanel row = new JPanel();
-        JPanel row2 = new JPanel();
+        row = new JPanel();
+        row2 = new JPanel();
         BevelPanel shop = new BevelPanel();
         JLabel shopLabel = new JLabel();
         JPanel grid = new JPanel();
@@ -134,10 +148,22 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
 
         // setting up row
         row.setLayout(new BorderLayout());
-        parentFrame.addComponentListener(new ResizeListener(parentFrame,row,0,0,0,200));
+        row.setBounds(0,0,500,500);
+        rowResize = new ResizeListener(parentFrame,row,0,0,0,200);
+        parentFrame.addComponentListener(rowResize);
         row.setAlignmentX(Component.LEFT_ALIGNMENT);
         row.setBackground(background.getBackground());
         contentLayer.add(row);
+        row.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (shopView)
+                    return;
+                Thread thread = new Thread(ItemShop.this::hideInventory);
+                thread.start();
+                shopView = true;
+            }
+        });
 
         // setting up shop
         JPanel shopWrapper = new JPanel();
@@ -177,10 +203,22 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
 
         // setting up row 2
         row2.setLayout(new BorderLayout());
-        parentFrame.addComponentListener(new ResizeListener(parentFrame,row2,0,-200,0,-400));
+        rowResize2 = new ResizeListener(parentFrame,row2,0,-200,0,-400);
+        parentFrame.addComponentListener(rowResize2);
         row2.setAlignmentX(Component.LEFT_ALIGNMENT);
         row2.setBackground(background.getBackground());
         contentLayer.add(row2);
+        row2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (!shopView)
+                    return;
+                hideCart();
+                Thread thread = new Thread(ItemShop.this::showInventory);
+                thread.start();
+                shopView = false;
+            }
+        });
 
         // setting up inventory
         JPanel inventoryWrapper = new JPanel();
@@ -192,7 +230,7 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         inventory.setRoundBottom(true);
         inventory.setBackground(new Color(201,201,201));
         inventory.setRounding(300);
-        parentFrame.addComponentListener(new ResizeListener(parentFrame,inventoryWrapper,0,-200));
+//        parentFrame.addComponentListener(new ResizeListener(parentFrame,inventoryWrapper,0,600));
         inventoryWrapper.add(inventory,BorderLayout.CENTER);
         row2.add(inventoryWrapper,BorderLayout.CENTER);
 
@@ -269,22 +307,103 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         // setting up total cost
         total.add(setupCoins(10));
 
-//        showInventory();
-//        showCart();
-
         return background;
     }
 
     public void showCart () {
         cart.setPreferredSize(new Dimension(260,400));
+        parentFrame.revalidate();
+        parentFrame.repaint();
+        contentListener.componentResized(null);
+        headerListener.componentResized(null);
+        rowResize.componentResized(null);
+        rowResize2.componentResized(null);
+    }
+
+    public void hideCart () {
+        cart.setPreferredSize(new Dimension(0,400));
+        parentFrame.revalidate();
+        parentFrame.repaint();
+        contentListener.componentResized(null);
+        headerListener.componentResized(null);
+        rowResize.componentResized(null);
+        rowResize2.componentResized(null);
     }
 
     public void showInventory () {
-        translate(0,-550);
+        // move the window up
+        for (int i = 0; i >= -550; i-=10) {
+            translate(0,i);
+            parentFrame.revalidate();
+            parentFrame.repaint();
+            contentListener.componentResized(null);
+            headerListener.componentResized(null);
+            rowResize.componentResized(null);
+            rowResize2.componentResized(null);
+            try {
+                Thread.sleep(1);
+            } catch (Exception e) {e.printStackTrace();}
+        }
+
+        // change the resize listener for row
+        parentFrame.removeComponentListener(rowResize);
+        rowResize = new ResizeListener(parentFrame,row,0,0);
+        row.setBounds(0,0,500,500);
+        rowResize.setIgnoreY(true);
+        parentFrame.addComponentListener(rowResize);
+
+        // change the resize listener for row2
+        parentFrame.removeComponentListener(rowResize2);
+        rowResize2 = new ResizeListener(parentFrame,row2,0,500,0,-400);
+        parentFrame.addComponentListener(rowResize2);
+
+        parentFrame.revalidate();
+        parentFrame.repaint();
+        contentListener.componentResized(null);
+        headerListener.componentResized(null);
+        rowResize.componentResized(null);
+        rowResize2.componentResized(null);
+    }
+
+    public void hideInventory () {
+        // move the window to standard
+        for (int i = -550; i < 1; i+=10) {
+            translate(0,i);
+            parentFrame.revalidate();
+            parentFrame.repaint();
+            contentListener.componentResized(null);
+            headerListener.componentResized(null);
+            rowResize.componentResized(null);
+            rowResize2.componentResized(null);
+            try {
+                Thread.sleep(1);
+            } catch (Exception e) {e.printStackTrace();}
+        }
+
+        // change the resize listener for row
+        parentFrame.removeComponentListener(rowResize);
+        rowResize.setIgnoreY(false);
+        rowResize = new ResizeListener(parentFrame,row,0,0,0,200);
+        parentFrame.addComponentListener(rowResize);
+
+        // change the resize listener for row2
+        parentFrame.removeComponentListener(rowResize2);
+        rowResize2 = new ResizeListener(parentFrame,row2,0,-200,0,-400);
+        parentFrame.addComponentListener(rowResize2);
+
+        parentFrame.revalidate();
+        parentFrame.repaint();
+        contentListener.componentResized(null);
+        headerListener.componentResized(null);
+        rowResize.componentResized(null);
+        rowResize2.componentResized(null);
+
+        if (!cartItems.isEmpty())
+            showCart();
     }
 
     private void translate (int x, int y) {
-        headerListener.translate(x,y);
+        headerListener.translate(x/6,y/6);
         contentListener.translate(x,y);
     }
 

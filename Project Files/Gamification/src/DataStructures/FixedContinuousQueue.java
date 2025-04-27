@@ -46,6 +46,7 @@ public class FixedContinuousQueue<T> {
             throw new Exception("Unable to retrieve data that is not present.");
 
         T retrieved = data[dequeuePoint];
+        data[dequeuePoint] = null;
         dequeuePoint = (dequeuePoint == data.length-1) ? 0 : (dequeuePoint + 1);
         return retrieved;
     }
