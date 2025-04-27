@@ -1,8 +1,10 @@
 package WindowStates;
 
+import ApplicationDefaults.BevelPanel;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
+import DataStructures.PlayerData;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -27,6 +29,17 @@ public class ToDos extends WindowState {
         super(WindowStateName.TODOS);
         super.setStartupScreen(false);
 
+        // Base background
+        BevelPanel background = new BevelPanel();
+        background.setLayout(new GridBagLayout());
+        background.setRounding(20);
+        background.setRoundTop(true);
+        background.setRoundBottom(true);
+        background.setBackground(new Color(240, 240, 240));
+        background.setOpaque(true);
+
+        getContentPane().add(background);
+
         //gridbag layout similar to login page
         getContentPane().setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -40,6 +53,8 @@ public class ToDos extends WindowState {
         //player xp and level label on ui
         playerXP = new PlayerXP(0, 1);
         xpLabel = new JLabel("XP: " + playerXP.getXp() + " / 1000 | Level: " + playerXP.getLevel());
+        xpLabel.setFont(new Font("Helvetica", Font.PLAIN, 32));
+        xpLabel.setForeground(new Color(116, 116, 116));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -51,25 +66,41 @@ public class ToDos extends WindowState {
          * Task list section
          * */
 
-        //tasklist label gridbag layout
-        JLabel taskLabel = new JLabel("Tasklist");
-        taskLabel.setFont(new Font("ARIEL", Font.PLAIN, 24));
+        // Tasklist Label Panel
+        BevelPanel taskLabelPanel = new BevelPanel();
+        taskLabelPanel.setBackground(new Color(220, 220, 220));
+        taskLabelPanel.setPreferredSize(new Dimension(250, 30)); // slightly shorter
+        taskLabelPanel.setRoundTop(true);
+        taskLabelPanel.setRoundBottom(true);
+        taskLabelPanel.setRounding(20);
+        taskLabelPanel.setLayout(new BorderLayout());
+        taskLabelPanel.setOpaque(true);
+
+        JLabel taskLabel = new JLabel("Tasklist", SwingConstants.CENTER);
+        taskLabel.setFont(new Font("Helvetica", Font.PLAIN, 18));
+        taskLabel.setForeground(new Color(116, 116, 116));
+        taskLabelPanel.add(taskLabel, BorderLayout.CENTER);
+
+        // Add to content pane using gridbag layout
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-        getContentPane().add(taskLabel, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        getContentPane().add(taskLabelPanel, gbc);
 
         //actual tasklist layout and grid as well as adding functionality (scroll and selection)
         tasklistModel = new DefaultListModel<>();
         tasklist = new JList<>(tasklistModel);
         tasklist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tasklist.setFont(new Font("ARIEL", Font.PLAIN, 16));
+        tasklist.setFont(new Font("Helvetica", Font.PLAIN, 16));
         tasklist.setCellRenderer(new TaskRenderer());
 
         //new scroll pane for task list scrollability
         JScrollPane scrollPane = new JScrollPane(tasklist);
         scrollPane.setPreferredSize(new Dimension(250, 250));
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -104,10 +135,20 @@ public class ToDos extends WindowState {
 
         JButton addButton = new JButton("Add Task");
         JButton removeButton = new JButton("Remove Task");
+        JButton missionSelectButton = new JButton("Back to Mission Select");
+
+
+        //font for buttons
+        Font buttonFont = new Font("Helvetica", Font.PLAIN, 16);
+        addButton.setFont(buttonFont);
+        removeButton.setFont(buttonFont);
+        missionSelectButton.setFont(buttonFont);
 
         //adding buttons to button panel
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
+        buttonPanel.add(missionSelectButton);
+
 
         //button panel frame layout
         gbc.gridx = 0;
@@ -118,14 +159,9 @@ public class ToDos extends WindowState {
 
         //functionality for the buttons
         addButton.addActionListener(e -> AddTask());
+
         removeButton.addActionListener(e -> RemoveTask());
 
-        /**
-         * Button for going back to main menu
-         * */
-
-        JButton missionSelectButton = new JButton("Back to Mission Select");
-        buttonPanel.add(missionSelectButton);
         missionSelectButton.addActionListener(e -> {
             setCloseEvent(WindowStateEvent.SWITCH_STATE);
             setNextWindow(WindowStateName.MISSION_SELECT);
@@ -138,18 +174,36 @@ public class ToDos extends WindowState {
         * Finished task section
         * */
         //label for the finished tasklist and its gridbag layout
-        JLabel finishedTaskLabel = new JLabel("Finished Tasklist");
-        finishedTaskLabel.setFont(new Font("ARIEL", Font.PLAIN, 24));
+        // Finished Tasklist Label Panel
+        BevelPanel finishedTaskLabelPanel = new BevelPanel();
+        finishedTaskLabelPanel.setBackground(new Color(220, 220, 220));
+        finishedTaskLabelPanel.setPreferredSize(new Dimension(250, 30));
+        finishedTaskLabelPanel.setRoundTop(true);
+        finishedTaskLabelPanel.setRoundBottom(true);
+        finishedTaskLabelPanel.setRounding(20);
+        finishedTaskLabelPanel.setLayout(new BorderLayout());
+        finishedTaskLabelPanel.setOpaque(true);
+
+        JLabel finishedTaskLabel = new JLabel("Finished Tasklist", SwingConstants.CENTER);
+        finishedTaskLabel.setFont(new Font("Helvetica", Font.PLAIN, 18));
+        finishedTaskLabel.setForeground(new Color(116, 116, 116));
+        finishedTaskLabelPanel.add(finishedTaskLabel, BorderLayout.CENTER);
+
+        // Add to content pane with GridBag
         gbc.gridx = 1;
         gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-        getContentPane().add(finishedTaskLabel, gbc);
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.CENTER;
+        getContentPane().add(finishedTaskLabelPanel, gbc);
+
+
 
         //Finished task list layout as well as scroll pane and selection
         finishedTasklistModel = new DefaultListModel<>();
         finishedTasklist = new JList<>(finishedTasklistModel);
         finishedTasklist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        finishedTasklist.setFont(new Font("ARIEL", Font.PLAIN, 16));
+        finishedTasklist.setFont(new Font("Helvetica", Font.PLAIN, 16));
         finishedTasklist.setCellRenderer(new TaskRenderer());
 
         //second scroll pane for finished task lsit
@@ -230,7 +284,7 @@ public class ToDos extends WindowState {
         public TaskRenderer() {
             setLayout(new BorderLayout());
             label = new JLabel();
-            label.setFont(new Font("Monospaced", Font.PLAIN, 16));
+            label.setFont(new Font("Helvetica", Font.PLAIN, 16));
             label.setBorder(new EmptyBorder(5, 10, 5, 10));
             add(label, BorderLayout.CENTER);
             setBorder(new LineBorder(Color.BLACK, 1));
@@ -262,10 +316,21 @@ public class ToDos extends WindowState {
             mission task = tasklistModel.getElementAt(selectedIndex);
             tasklistModel.remove(selectedIndex);
             finishedTasklistModel.addElement(task);
+
             playerXP.addXp(task.getXp());
+
+            // Sync with PlayerData
+            PlayerData.xp = playerXP.getXp();
+            PlayerData.level = playerXP.getLevel();
+
+            // Save using FileHandler
+            FileHandler fileHandler = new FileHandler("resources/"); // use your actual path
+            PlayerData.save(fileHandler);
+
             xpLabel.setText("XP: " + playerXP.getXp() + " / 1000 | Level: " + playerXP.getLevel());
         }
     }
+
 
     @Override
     public void onEscapePressed () {
@@ -278,5 +343,15 @@ public class ToDos extends WindowState {
     public void save(FileHandler fileHandler) {}
 
     @Override
-    public void load(FileHandler fileHandler) {}
+    public void load(FileHandler fileHandler) {
+        if (fileHandler.retrieveInt("player_level") == -1) {
+            System.out.println("[ToDos] No player data found. Saving defaults...");
+            PlayerData.save(fileHandler); // saves default values in PlayerData (xp = 0, level = 1, etc.)
+        }
+
+        PlayerData.load(fileHandler);
+        playerXP = new PlayerXP(PlayerData.xp, PlayerData.level);
+        xpLabel.setText("XP: " + playerXP.getXp() + " / 1000 | Level: " + playerXP.getLevel());
+    }
+
 }
