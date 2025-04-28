@@ -3,13 +3,15 @@ package WindowStates;
 import ApplicationDefaults.*;
 import DataStructures.FileHandler;
 import DataStructures.GenericItem;
+import DataStructures.PlayerData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ItemShop extends WindowState implements AcceptMouseResponse {
     private JPanel popup;
@@ -18,6 +20,8 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
     private ResizeListener headerListener;
     private ResizeListener contentListener;
     private JPanel cart;
+    private JPanel cartContent;
+    private JPanel total;
     private JFrame parentFrame;
     private JPanel background;
     private JPanel row;
@@ -26,6 +30,16 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
     private ResizeListener rowResize2;
     private boolean shopView;
     private ArrayList<GenericItem> cartItems;
+    private ArrayList<GenericItem> shopItems;
+    private ArrayList<GenericItem> inventoryItems;
+    private int runningTotalCart;
+    private int purse;
+    private boolean confirmDialog;
+    private Dimension dialogControl;
+    private JPanel grid;
+    private JPanel inventoryGrid;
+    private JPanel coins;
+    private JPanel coinWrapper;
 
     public ItemShop(JFrame parentFrame) {
         // setup frame
@@ -40,11 +54,17 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         ((BevelPanel) popup).setRounding(10);
         popup.setOpaque(false);
         popupOpen = false;
+        runningTotalCart = 0;
+        purse = 0;
+        confirmDialog = false;
+
+        // setup capacities
+        shopItems = new ArrayList<>(6);
+        inventoryItems = new ArrayList<>(6);
 
         // setup UI
         shopView = true;
         cartItems = new ArrayList<>();
-        cartItems.add(new GenericItem());
         background = setupUI();
 
         // setup bounds and add items
@@ -55,6 +75,97 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         mouseController = new MouseController(this);
         parentFrame.addMouseListener(mouseController.getMouseListener());
         parentFrame.addMouseMotionListener(mouseController.getMouseMotionListener());
+    }
+
+    public void updateShop () {
+        grid.removeAll();
+        grid.setLayout(new GridLayout(4,11));
+        for (int i = 0; i < 44; i++)
+            if (i < shopItems.size())
+                grid.add(setupItem(shopItems.get(i)));
+            else
+                grid.add(setupItem());
+        grid.repaint();
+        grid.revalidate();
+    }
+
+    public void updateInventory () {
+        inventoryGrid.removeAll();
+        inventoryGrid.setLayout(new GridLayout(4,11));
+        for (int i = 0; i < 44; i++)
+            if (i < inventoryItems.size())
+                inventoryGrid.add(setupItem(inventoryItems.get(i),true));
+            else
+                inventoryGrid.add(setupItem());
+        inventoryGrid.repaint();
+        inventoryGrid.revalidate();
+    }
+
+    public void showDialog () {
+        confirmDialog = true;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 1000; i > 0; i-=20) {
+                    dialogControl.setSize(100,i);
+                    headerListener.componentResized(null);
+
+                    try {
+                        Thread.sleep(1);
+                    } catch (Exception e) { e.printStackTrace(); }
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public void cancel () {
+        confirmDialog = false;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 1000; i+=20) {
+                    dialogControl.setSize(100,i);
+                    headerListener.componentResized(null);
+
+                    try {
+                        Thread.sleep(1);
+                    } catch (Exception e) { e.printStackTrace(); }
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public void purchase () {
+        int total = runningTotalCart;
+        for (int i = cartItems.size()-1; i >= 0; i--) {
+            GenericItem item = cartItems.get(i);
+            removeFromCart(item);
+            shopItems.remove(item);
+            inventoryItems.add(item);
+        }
+        updateShop();
+        updateInventory();
+        cancel();
+        purse -= total;
+        coins = setupCoins(purse);
+        coinWrapper.remove(0);
+        coinWrapper.add(coins,BorderLayout.CENTER);
+        coinWrapper.repaint();
+        row2.getMouseListeners()[0].mousePressed(null);
+    }
+
+    public void itemToggled (GenericItem item, boolean added) {
+        if (added)
+            addToCart(item);
+        else
+            removeFromCart(item);
+
+        if (cartItems.isEmpty())
+            hideCart();
+        else
+            showCart();
     }
 
     public void onDrag (int x, int y) {}
@@ -83,20 +194,20 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         JPanel headerLayer = new JPanel();
         BevelPanel header = new BevelPanel();
         JLabel headerlabel = new JLabel();
-        JPanel coins = setupCoins(244);
+        coins = setupCoins(244);
         JPanel contentLayer = new JPanel();
         row = new JPanel();
         row2 = new JPanel();
         BevelPanel shop = new BevelPanel();
         JLabel shopLabel = new JLabel();
-        JPanel grid = new JPanel();
+        grid = new JPanel();
         BevelPanel inventory = new BevelPanel();
         JLabel inventoryLabel = new JLabel();
-        JPanel inventoryGrid = new JPanel();
+        inventoryGrid = new JPanel();
         BevelPanel cart = new BevelPanel();
         JLabel cartLabel = new JLabel();
-        JPanel cartContent = new JPanel();
-        JPanel total = new JPanel();
+        cartContent = new JPanel();
+        total = new JPanel();
         JLabel totalLabel = new JLabel();
         JPanel totalCost = setupCoins(10);
 
@@ -105,13 +216,20 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         background.setBackground(new Color(223,223,223));
 
         // setting up header layer
-        headerLayer.setLayout(new BoxLayout(headerLayer,BoxLayout.Y_AXIS));
+        headerLayer.setLayout(new BorderLayout());
         headerListener = new ResizeListener(parentFrame,headerLayer);
         parentFrame.addComponentListener(headerListener);
         headerLayer.setOpaque(false);
         headerLayer.setBackground(new Color(0,0,0,0));
         headerLayer.setBounds(0,0,2000,2000);
         background.add(headerLayer);
+
+        // setting up header wrapper
+        JPanel headerWrapper = new JPanel();
+        headerWrapper.setLayout(new BoxLayout(headerWrapper,BoxLayout.Y_AXIS));
+        headerWrapper.setOpaque(false);
+        headerWrapper.setBackground(new Color(0,0,0,0));
+        headerLayer.add(headerWrapper,BorderLayout.NORTH);
 
         // setting up header
         header.setLayout(new FlowLayout());
@@ -121,7 +239,7 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         header.setMinimumSize(new Dimension(200,100));
         header.setMaximumSize(new Dimension(600,100));
         header.setAlignmentX(Component.CENTER_ALIGNMENT);
-        headerLayer.add(header);
+        headerWrapper.add(header);
 
         // setting up header content
         headerlabel.setText("Item Shop");
@@ -129,12 +247,138 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         headerlabel.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
         headerlabel.setForeground(new Color(124,124,124));
         header.add(headerlabel);
-        JPanel coinWrapper = new JPanel();
+        coinWrapper = new JPanel();
         coinWrapper.setLayout(new BorderLayout());
         coinWrapper.add(coins,BorderLayout.CENTER);
         coinWrapper.setBorder(BorderFactory.createEmptyBorder(15,10,0,0));
         coinWrapper.setBackground(header.getBackground());
         header.add(coinWrapper);
+
+        // setup Notification Slider
+        JPanel notificationSlider = new JPanel();
+        notificationSlider.setLayout(new GridBagLayout());
+        notificationSlider.setOpaque(false);
+        notificationSlider.setPreferredSize(new Dimension(2000,2000));
+        notificationSlider.setMinimumSize(notificationSlider.getPreferredSize());
+        notificationSlider.setMaximumSize(notificationSlider.getPreferredSize());
+        headerLayer.add(notificationSlider,BorderLayout.CENTER);
+
+        // setup dialog control
+        JPanel controlPanelDialog = new JPanel();
+        controlPanelDialog.setOpaque(false);
+        dialogControl = new Dimension(100,1000);
+        controlPanelDialog.setPreferredSize(dialogControl);
+        headerLayer.add(controlPanelDialog,BorderLayout.SOUTH);
+
+        // setup notification wrapper to center notification on slider
+        JPanel notificationWrapper = new JPanel();
+        notificationWrapper.setLayout(new BorderLayout());
+        notificationWrapper.setPreferredSize(new Dimension(400,200));
+        notificationWrapper.setMinimumSize(notificationWrapper.getPreferredSize());
+        notificationWrapper.setMaximumSize(notificationWrapper.getPreferredSize());
+        notificationWrapper.setOpaque(false);
+        notificationWrapper.setBackground(Color.RED);
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.CENTER;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        notificationSlider.add(notificationWrapper,c);
+
+        // setup notification
+        BevelPanel notification = new BevelPanel();
+        notification.setRoundTop(true);
+        notification.setRoundBottom(true);
+        notification.setBackground(new Color(168,168,168));
+        notification.setDecorativeBorder(new DecorativeBorder(new Color(150,150,150),1));
+        notification.setLayout(new BorderLayout());
+        JLabel notifMessage = new JLabel("Confirm?");
+        notifMessage.setFont(new Font("Helvetica",Font.PLAIN,32));
+        notifMessage.setForeground(new Color(124,124,124));
+        notifMessage.setHorizontalAlignment(SwingConstants.CENTER);
+        notifMessage.setVerticalAlignment(SwingConstants.CENTER);
+        notifMessage.setBorder(BorderFactory.createEmptyBorder(20,10,10,10));
+        notification.add(notifMessage,BorderLayout.NORTH);
+        notificationWrapper.add(notification,BorderLayout.CENTER);
+
+        // setup choices
+        JPanel choices = new JPanel();
+        notification.add(choices,BorderLayout.SOUTH);
+        choices.setLayout(new GridBagLayout());
+        BevelPanel cancel = new BevelPanel();
+        cancel.setBackground(Color.RED);
+        cancel.setLayout(new BorderLayout());
+        cancel.setPreferredSize(new Dimension(100,50));
+        c = new GridBagConstraints();
+        c.fill = GridBagConstraints.NONE;
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        choices.add(cancel,c);
+        BevelPanel purchase = new BevelPanel();
+        purchase.setBackground(Color.GREEN);
+        purchase.setLayout(new BorderLayout());
+        purchase.setPreferredSize(new Dimension(100,50));
+        c.anchor = GridBagConstraints.FIRST_LINE_END;
+        choices.add(purchase,c);
+        choices.setOpaque(false);
+        choices.setBorder(BorderFactory.createEmptyBorder(0,40,20,40));
+        cancel.setRoundTop(true);
+        cancel.setRoundBottom(true);
+        purchase.setRoundTop(true);
+        purchase.setRoundBottom(true);
+        cancel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                ItemShop.this.cancel();
+            }
+        });
+        purchase.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                SwingUtilities.invokeLater(ItemShop.this::purchase);
+            }
+        });
+        parentFrame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (confirmDialog)
+                    ItemShop.this.cancel();
+            }
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                if (confirmDialog)
+                    ItemShop.this.cancel();
+            }
+        });
+
+        // adding text
+        JLabel messageText = new JLabel("<html><p style=\"text-align=center;\">" +
+                "Would you like to confirm purchase. You cannot reverse this</p></html>");
+        JLabel cancelText = new JLabel("Cancel");
+        JLabel purchaseText = new JLabel("Purchase");
+        messageText.setHorizontalAlignment(SwingConstants.CENTER);
+        messageText.setVerticalAlignment(SwingConstants.CENTER);
+        messageText.setFont(new Font("Helvetica",Font.PLAIN,18));
+        cancelText.setHorizontalAlignment(SwingConstants.CENTER);
+        cancelText.setVerticalAlignment(SwingConstants.CENTER);
+        cancelText.setFont(new Font("Helvetica",Font.PLAIN,18));
+        purchaseText.setHorizontalAlignment(SwingConstants.CENTER);
+        purchaseText.setVerticalAlignment(SwingConstants.CENTER);
+        purchaseText.setFont(new Font("Helvetica",Font.PLAIN,18));
+        messageText.setForeground(new Color(124,124,124));
+        cancelText.setForeground(new Color(124,124,124));
+        purchaseText.setForeground(new Color(124,124,124));
+        messageText.setBorder(BorderFactory.createEmptyBorder(10,40,10,40));
+        cancelText.setBorder(BorderFactory.createEmptyBorder(10,5,10,5));
+        purchaseText.setBorder(BorderFactory.createEmptyBorder(10,5,10,5));
+        notification.add(messageText,BorderLayout.CENTER);
+        cancel.add(cancelText);
+        purchase.add(purchaseText);
 
         // setting up content layer
         contentLayer.setLayout(null);
@@ -199,7 +443,10 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
 
         // setting up grid content
         for (int i = 0; i < 44; i++)
-            grid.add(setupItem());
+            if (i < shopItems.size())
+                grid.add(setupItem(shopItems.get(i)));
+            else
+                grid.add(setupItem());
 
         // setting up row 2
         row2.setLayout(new BorderLayout());
@@ -288,15 +535,18 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         cartContent.setOpaque(false);
         cartBody.add(cartContent,BorderLayout.CENTER);
         cartBody.setBorder(BorderFactory.createEmptyBorder(0,25,0,0));
-        // setting up item costs
-        for (int i = 0; i < 3; i++) {
-            cartContent.add(setupItemCost(i*10));
-        }
 
         // setting up total cost
         total.setLayout(new FlowLayout());
         total.setOpaque(false);
         cartBody.add(total,BorderLayout.SOUTH);
+        total.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (runningTotalCart <= purse)
+                    ItemShop.this.showDialog();
+            }
+        });
 
         // setting up total label
         totalLabel.setText("Total: ");
@@ -305,9 +555,37 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         total.add(totalLabel);
 
         // setting up total cost
-        total.add(setupCoins(10));
+        total.add(setupCoins(0));
 
         return background;
+    }
+
+    private void addToCart (GenericItem item) {
+        cartItems.add(item);
+        int cost = item.getCost();
+        runningTotalCart += cost;
+        cartContent.add(setupItemCost(item.getInventoryLook(),cost));
+        total.remove(1);
+        total.add(setupCoins(runningTotalCart,true));
+        cartContent.repaint();
+        cartContent.revalidate();
+        total.repaint();
+    }
+
+    private void removeFromCart (GenericItem item) {
+        int cost = item.getCost();
+        int index = 0;
+        for (index = 0; index < cartItems.size(); index++)
+            if (cartItems.get(index) == item)
+                break;
+        cartContent.remove(index);
+        runningTotalCart -= cost;
+        total.remove(1);
+        total.add(setupCoins(runningTotalCart,true));
+        cartItems.remove(item);
+        cartContent.repaint();
+        cartContent.revalidate();
+        total.repaint();
     }
 
     public void showCart () {
@@ -415,7 +693,7 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         contentListener.translate(x,y);
     }
 
-    private JPanel setupItemCost (int coins) {
+    private JPanel setupItemCost (JLabel icon, int coins) {
         JPanel panel = new JPanel();
         panel.setBackground(new Color(0,0,0,0));
         panel.setOpaque(true);
@@ -428,6 +706,16 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         item.setOpaque(false);
         item.setPreferredSize(new Dimension(50,50));
         item.setBackground(new Color(168,168,168));
+        item.setLayout(new BorderLayout());
+
+        JLabel iconCopy = new JLabel();
+        iconCopy.setHorizontalAlignment(SwingConstants.CENTER);
+        iconCopy.setVerticalAlignment(SwingConstants.CENTER);
+        iconCopy.setAlignmentX(Component.CENTER_ALIGNMENT);
+        iconCopy.setAlignmentY(Component.CENTER_ALIGNMENT);
+        iconCopy.setIcon(icon.getIcon());
+
+        item.add(iconCopy);
 
         panel.add(item);
         panel.add(setupCoins(coins));
@@ -436,12 +724,25 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
     }
 
     private JPanel setupItem () {
+        return setupItem(null);
+    }
+
+    private JPanel setupItem (GenericItem item) {
+        return setupItem(item,false);
+    }
+
+    private JPanel setupItem (GenericItem item, boolean disabled) {
         BevelPanel panel = new BevelPanel();
         panel.setRoundTop(true);
         panel.setRoundBottom(true);
         panel.setOpaque(false);
         panel.setPreferredSize(new Dimension(50,50));
         panel.setBackground(new Color(168,168,168));
+
+        if (item != null) {
+            panel.setLayout(new BorderLayout());
+            panel.add(item.getInventoryLook(),BorderLayout.CENTER);
+        }
 
         JPanel spacerX = new JPanel();
         spacerX.setPreferredSize(new Dimension(1,1));
@@ -475,15 +776,66 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
                 spacerY,spacerY2));
         wrapper.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
+        if (item != null && !disabled) {
+            panel.addMouseListener(new MouseAdapter() {
+                private boolean selected = false;
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (confirmDialog)
+                        return;
+                    selected = !selected;
+                    if (selected) {
+                        ItemShop.this.itemToggled(item,true);
+                        panel.setBackground(new Color(140, 140, 140));
+                        panel.repaint();
+                    } else {
+                        ItemShop.this.itemToggled(item,false);
+                        panel.setBackground(new Color(168, 168, 168));
+                        panel.repaint();
+                    }
+                }
+            });
+        } else {
+            panel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (confirmDialog)
+                        return;
+                    panel.setBackground(new Color(140, 140, 140));
+                    panel.repaint();
+                    Timer timer = new Timer(250, new ActionListener(){
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            panel.setBackground(new Color(168, 168, 168));
+                            panel.repaint();
+                        }
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
+                }
+            });
+        }
+
         return wrapper;
     }
 
     private JPanel setupCoins (int coins) {
+        return setupCoins(coins,false);
+    }
+
+    private JPanel setupCoins (int coins, boolean withColor) {
         BevelPanel panel = new BevelPanel();
         panel.setRoundTop(true);
         panel.setRoundBottom(true);
         panel.setOpaque(false);
-        panel.setBackground(new Color(173,173,173));
+        if (withColor)
+            if (runningTotalCart <= purse)
+                panel.setBackground(Color.GREEN);
+            else
+                panel.setBackground(Color.RED);
+        else
+            panel.setBackground(new Color(173,173,173));
         panel.setPreferredSize(new Dimension(120,50));
         panel.setLayout(new BorderLayout());
 
@@ -507,13 +859,92 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
 
     @Override
     public void save(FileHandler fileHandler) {
-
+        fileHandler.save(PlayerData.currentUser + "-hasLoaded",true);
+        PlayerData.xp = purse;
+        PlayerData.save(fileHandler);
+        String[] shopItemsList = new String[shopItems.size()];
+        String[] inventoryItemsList = new String[inventoryItems.size()];
+        for (int i = 0; i < shopItems.size(); i++)
+            shopItemsList[i] = shopItems.get(i).getCharacterLookName();
+        for (int i = 0; i < inventoryItems.size(); i++)
+            inventoryItemsList[i] = inventoryItems.get(i).getCharacterLookName();
+        fileHandler.save(PlayerData.name + "-shop-items",shopItemsList);
+        fileHandler.save(PlayerData.name + "-inventory-items",inventoryItemsList);
     }
 
     @Override
     public void load(FileHandler fileHandler) {
+        // ensure graphics are loaded correctly
         for (ComponentListener listener : parentFrame.getComponentListeners())
             if (listener instanceof ResizeListener)
                 listener.componentResized(null);
+
+        // initialize money
+        PlayerData.load(fileHandler);
+        purse = PlayerData.xp;
+        coins = setupCoins(purse);
+        coinWrapper.remove(0);
+        coinWrapper.add(coins,BorderLayout.CENTER);
+        coinWrapper.repaint();
+
+        // check if this is the first time loading for this profile
+        boolean hasLoaded = fileHandler.retrieveBoolean(PlayerData.currentUser + "-hasLoaded");
+
+        // reset shop and inventory items, because we will be re-loading them from storage
+        inventoryItems = new ArrayList<>();
+        shopItems = new ArrayList<>();
+
+        // initialize items available for purchase
+        if (!hasLoaded) { // setup defaults
+            shopItems.add(new GenericItem("Bow", 5, "shop-bow", "bow"));
+            shopItems.add(new GenericItem("Sword", 10, "shop-single-sword", "single-sword"));
+            shopItems.add(new GenericItem("Dual Sword", 15, "shop-dual-sword", "dual-sword"));
+            shopItems.add(new GenericItem("Helmet", 20, "shop-helmet", "helmet"));
+            shopItems.add(new GenericItem("Chestplate", 25, "shop-chestplate", "chestplate"));
+            shopItems.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
+        } else { // load previous shop items
+            String[] array = fileHandler.retrieveStringArray(PlayerData.name + "-shop-items");
+            Set<String> availableItems = Arrays.stream(array).collect(Collectors.toSet());
+            if (availableItems.contains("bow"))
+                shopItems.add(new GenericItem("Bow", 5, "shop-bow", "bow"));
+            if (availableItems.contains("single-sword"))
+                shopItems.add(new GenericItem("Sword", 10, "shop-single-sword", "single-sword"));
+            if (availableItems.contains("dual-sword"))
+                shopItems.add(new GenericItem("Dual Sword", 15, "shop-dual-sword", "dual-sword"));
+            if (availableItems.contains("helmet"))
+                shopItems.add(new GenericItem("Helmet", 20, "shop-helmet", "helmet"));
+            if (availableItems.contains("chestplate"))
+                shopItems.add(new GenericItem("Chestplate", 25, "shop-chestplate", "chestplate"));
+            if (availableItems.contains("leggings"))
+                shopItems.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
+        }
+
+        // initialize items in inventory
+        if (hasLoaded) {
+            String[] array = fileHandler.retrieveStringArray(PlayerData.name + "-inventory-items");
+            Set<String> availableItems = Arrays.stream(array).collect(Collectors.toSet());
+            if (availableItems.contains("bow"))
+                inventoryItems.add(new GenericItem("Bow", 5, "shop-bow", "bow"));
+            if (availableItems.contains("single-sword"))
+                inventoryItems.add(new GenericItem("Sword", 10, "shop-single-sword", "single-sword"));
+            if (availableItems.contains("dual-sword"))
+                inventoryItems.add(new GenericItem("Dual Sword", 15, "shop-dual-sword", "dual-sword"));
+            if (availableItems.contains("helmet"))
+                inventoryItems.add(new GenericItem("Helmet", 20, "shop-helmet", "helmet"));
+            if (availableItems.contains("chestplate"))
+                inventoryItems.add(new GenericItem("Chestplate", 25, "shop-chestplate", "chestplate"));
+            if (availableItems.contains("leggings"))
+                inventoryItems.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
+        }
+
+        // update UI
+        updateShop();
+        updateInventory();
+
+        // load images from items from resources folder
+        for (GenericItem item : shopItems)
+            item.load(fileHandler);
+        for (GenericItem item : inventoryItems)
+            item.load(fileHandler);
     }
 }
