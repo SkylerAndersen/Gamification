@@ -3,6 +3,7 @@ package WindowStates;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
+import DataStructures.PlayerData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -115,7 +116,7 @@ public class Character extends WindowState {
 
     @Override
     public void load(FileHandler fileHandler) {
-
+        
     }
 }
 

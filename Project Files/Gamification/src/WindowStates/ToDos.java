@@ -123,6 +123,8 @@ public class ToDos extends WindowState {
         tasklistModel.addElement(new mission("Task1", 500));
         tasklistModel.addElement(new mission("Task2", 500));
         tasklistModel.addElement(new mission("Task3", 500));
+        tasklistModel.addElement(new mission("Work", 500));
+        tasklistModel.addElement(new mission("Gym", 500));
 
 
         /**
