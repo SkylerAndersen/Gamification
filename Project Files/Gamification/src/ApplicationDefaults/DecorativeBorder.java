@@ -2,7 +2,7 @@ package ApplicationDefaults;
 
 import java.awt.*;
 
-class DecorativeBorder {
+public class DecorativeBorder {
     private Color color;
     private int width;
     public DecorativeBorder() {
