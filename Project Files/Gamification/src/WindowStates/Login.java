@@ -21,6 +21,7 @@ import java.io.*;
 // NOTES: Will move the user_database.bin file to another location and may look into encryption options
 
 public class Login extends WindowState {
+    private FileHandler fileHandler;
 
     public Login () {
         super(WindowStateName.LOGIN);
@@ -111,8 +112,8 @@ public class Login extends WindowState {
                 // Authenticate using the UserDatabase class
                 boolean isAuthenticated = UserDatabase.authenticate(username, password);
                 if (isAuthenticated) {
-
                     PlayerData.currentUser = username; // when authenticated, tells player data what data to call
+                    PlayerData.load(fileHandler);
 
                     String today = LocalDate.now().toString();
 
@@ -122,26 +123,16 @@ public class Login extends WindowState {
                             PlayerData.level++;
                             PlayerData.xp -= 1000;
                         }
+                        // Pop up notification for the login reward
+                        JOptionPane.showMessageDialog(
+                                getContentPane(),
+                                "Daily Login Bonus!\nYou have gained 50 XP!",
+                                "Login Reward",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
                     }
 
                     PlayerData.lastLoginDate = today; // Update the last login date
-
-                    // Save the data
-                    FileHandler fileHandler = new FileHandler("resources/");
-                    PlayerData.save(fileHandler);
-
-                    // Pop up notification for the login reward
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            JOptionPane.showMessageDialog(
-                                    getContentPane(),
-                                    "Daily Login Bonus!\nYou have gained 50 XP!",
-                                    "Login Reward",
-                                    JOptionPane.INFORMATION_MESSAGE
-                            );
-                        }
-                    });
 
                     close(); // If the username and password are both valid, then the next screen is opened
                 } else {
@@ -221,10 +212,14 @@ public class Login extends WindowState {
     }
 
     @Override
-    public void save(FileHandler fileHandler) {}
+    public void save(FileHandler fileHandler) {
+        PlayerData.save(fileHandler);
+    }
 
     @Override
-    public void load(FileHandler fileHandler) {}
+    public void load(FileHandler fileHandler) {
+        this.fileHandler = fileHandler;
+    }
 
     public class PasswordUtils { // Class used to hash password using SHA-256
         public static String hashPassword(String password) {

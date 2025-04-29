@@ -23,6 +23,7 @@ public class ToDos extends WindowState {
     //labels for the xp and level
     private JLabel xpLabel;
     private PlayerXP playerXP;
+    private FileHandler fileHandler;
 
     //main ui
     public ToDos() {
@@ -324,7 +325,6 @@ public class ToDos extends WindowState {
             PlayerData.level = playerXP.getLevel();
 
             // Save using FileHandler
-            FileHandler fileHandler = new FileHandler("resources/"); // use your actual path
             PlayerData.save(fileHandler);
 
             xpLabel.setText("XP: " + playerXP.getXp() + " / 1000 | Level: " + playerXP.getLevel());
@@ -352,6 +352,7 @@ public class ToDos extends WindowState {
         PlayerData.load(fileHandler);
         playerXP = new PlayerXP(PlayerData.xp, PlayerData.level);
         xpLabel.setText("XP: " + playerXP.getXp() + " / 1000 | Level: " + playerXP.getLevel());
+        this.fileHandler = fileHandler;
     }
 
 }
