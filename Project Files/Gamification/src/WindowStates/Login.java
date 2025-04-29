@@ -4,7 +4,7 @@ import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
 import DataStructures.PlayerData;
-import DataStructures.PlayerData;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -127,8 +127,8 @@ public class Login extends WindowState {
                     PlayerData.lastLoginDate = today; // Update the last login date
 
                     // Save the data
-                    FileHandler fileHandler = new FileHandler("resources/");
-                    PlayerData.save(fileHandler);
+
+
 
                     // Pop up notification for the login reward
                     SwingUtilities.invokeLater(new Runnable() {

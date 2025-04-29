@@ -19,7 +19,7 @@ public class PlayerData {
         fileHandler.save(currentUser + "_coins", coins);
         fileHandler.save(currentUser + "_level", level);
         fileHandler.save(currentUser + "_xp", xp);
-        fileHandler.save("_player_last_login_date", lastLoginDate);
+        fileHandler.save(currentUser + "_last_login_date", lastLoginDate);
 
     }
 
@@ -37,7 +37,7 @@ public class PlayerData {
         int loadedXp = fileHandler.retrieveInt(currentUser + "_xp");
         xp = (loadedXp == -1) ? 0 : loadedXp;
 
-        String loadedLastLoginDate = fileHandler.retrieveString("_player_last_login_date");
+        String loadedLastLoginDate = fileHandler.retrieveString(currentUser + "_last_login_date");
         lastLoginDate = (loadedLastLoginDate == null) ? "" : loadedLastLoginDate;
     }
 }
