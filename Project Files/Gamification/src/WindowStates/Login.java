@@ -4,6 +4,7 @@ import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
 import DataStructures.PlayerData;
+import DataStructures.PlayerData;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.nio.file.Paths;
 import java.security.MessageDigest; // Used for computing message digests (a fixed length hash value)
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate; // for login rewards
 
 import java.io.*;
 
@@ -110,7 +112,36 @@ public class Login extends WindowState {
                 boolean isAuthenticated = UserDatabase.authenticate(username, password);
                 if (isAuthenticated) {
 
-                    PlayerData.currentUser = username; //when authenticated, tells player data what data to call
+                    PlayerData.currentUser = username; // when authenticated, tells player data what data to call
+
+                    String today = LocalDate.now().toString();
+
+                    if (!today.equals(PlayerData.lastLoginDate)){ // Check if the player alread received today's bonus
+                        PlayerData.xp += 50; // Give 50 XP
+                        if (PlayerData.xp >= 1000) {
+                            PlayerData.level++;
+                            PlayerData.xp -= 1000;
+                        }
+                    }
+
+                    PlayerData.lastLoginDate = today; // Update the last login date
+
+                    // Save the data
+                    FileHandler fileHandler = new FileHandler("resources/");
+                    PlayerData.save(fileHandler);
+
+                    // Pop up notification for the login reward
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(
+                                    getContentPane(),
+                                    "Daily Login Bonus!\nYou have gained 50 XP!",
+                                    "Login Reward",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        }
+                    });
 
                     close(); // If the username and password are both valid, then the next screen is opened
                 } else {
