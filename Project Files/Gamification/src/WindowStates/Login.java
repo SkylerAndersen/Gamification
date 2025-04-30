@@ -1,13 +1,12 @@
 package WindowStates;
 
+import ApplicationDefaults.BevelPanel;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
 import DataStructures.FileHandler;
 import DataStructures.PlayerData;
-import DataStructures.PlayerData;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,8 +17,6 @@ import java.time.LocalDate; // for login rewards
 
 import java.io.*;
 
-// NOTES: Will move the user_database.bin file to another location and may look into encryption options
-
 public class Login extends WindowState {
     private FileHandler fileHandler;
 
@@ -27,78 +24,98 @@ public class Login extends WindowState {
         super(WindowStateName.LOGIN);
         super.setStartupScreen(true); // Initialize the app to this screen
 
-        // I removed the JFrame since this WindowState is already a JWindow, and needs to be adopted by our JFrame
-        // I also removed the EXIT_ON_CLOSE as this would forcefully terminate without letting our exit hooks
-        // ensure that every thread properly closes, and all data is properly saved.
         setTitle("Login");
-//        getContentPane().setSize(1000, 1000); // Set initial size when opened [Note: This won't change the size
-//                                                because the WindowState is adopted by a different JFrame and I
-//                                                didn't want the application to be reliant on variable
-//                                                WindowStates. A method could be added that keeps track of the
-//                                                window's requested size and managers that if this is desired.]
 
         getContentPane().setLayout(new GridBagLayout()); // GridBagLayout in order to have more precision when placing components
-        GridBagConstraints gbc = new GridBagConstraints();
 
         // LOGIN SCREEN
 
-        Font titleFont = new Font("Helvetica", Font.BOLD, 30);
+        getContentPane().setBackground(new Color(223, 223, 223));
+        getContentPane().setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 30, 10, 30);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel title = new JLabel("Welcome!"); // Title label
-        title.setFont(titleFont);
-        title.setBorder(new EmptyBorder(0, 0, 100, 0));
+        // Create the styled panel container
+        BevelPanel loginBox = new BevelPanel();
+        loginBox.setLayout(new GridBagLayout());
+        loginBox.setRoundTop(true);
+        loginBox.setRoundBottom(true);
+        loginBox.setRounding(30);
+        loginBox.setBackground(new Color(201, 201, 201));
+        loginBox.setOpaque(true);
+        loginBox.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+
+        // Wrap the loginBox inside a container to center it
+        JPanel outerWrapper = new JPanel(new GridBagLayout());
+        outerWrapper.setBackground(new Color(223, 223, 223));
+        outerWrapper.add(loginBox);
+
+        // Set the main window's content
+        getContentPane().removeAll(); // Just in case
+        getContentPane().add(outerWrapper);
+
+        Font labelFont = new Font("Helvetica", Font.PLAIN, 18);
+        Color textColor = new Color(124, 124, 124);
+        Color inputBg = new Color(220, 220, 220);
+
+        JLabel title = new JLabel("Welcome to Questify!");
+        title.setFont(new Font("Helvetica", Font.PLAIN, 48));
+        title.setForeground(textColor);
+        title.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(title, gbc);
+        loginBox.add(title, gbc);
 
-        Font labelFont = new Font("Helvetica", Font.ITALIC, 15);
-
-        JLabel usernameLabel = new JLabel("Username:"); // Login username label
+        // Username Label
+        JLabel usernameLabel = new JLabel("Username:");
         usernameLabel.setFont(labelFont);
-        usernameLabel.setBorder(new EmptyBorder(0, 0, 5, 0));
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        usernameLabel.setForeground(textColor);
         usernameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(usernameLabel, gbc);
+        gbc.gridy++;
+        loginBox.add(usernameLabel, gbc);
 
-        JTextField usernameField = new JTextField(); // Login username text field
-        usernameField.setColumns(30);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        usernameField.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(usernameField, gbc);
+        // Username Field
+        JTextField usernameField = new JTextField();
+        usernameField.setFont(labelFont);
+        usernameField.setBackground(inputBg);
+        usernameField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        gbc.gridy++;
+        loginBox.add(usernameField, gbc);
 
-        JLabel empty = new JLabel(" "); // Spacing between the username section and password section
-        empty.setBorder(new EmptyBorder(5, 0, 5, 0));
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        getContentPane().add(empty, gbc);
+        // Spacer
+        gbc.gridy++;
+        loginBox.add(Box.createVerticalStrut(20), gbc);
 
-        JLabel passwordLabel = new JLabel("Password:"); // Login password label
+        // Password Label
+        JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setFont(labelFont);
-        passwordLabel.setBorder(new EmptyBorder(0, 0, 5, 0));
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        passwordLabel.setForeground(textColor);
         passwordLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(passwordLabel, gbc);
+        gbc.gridy++;
+        loginBox.add(passwordLabel, gbc);
 
-        JPasswordField passwordField = new JPasswordField(30); // Login password field
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 2;
-        passwordField.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(passwordField, gbc);
+        // Password Field
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setFont(labelFont);
+        passwordField.setBackground(inputBg);
+        passwordField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        gbc.gridy++;
+        loginBox.add(passwordField, gbc);
+
+        // Login Button
+        JButton loginButton = new JButton("Enter");
+        loginButton.setFont(labelFont);
+        loginButton.setBackground(new Color(168, 168, 168));
+        loginButton.setForeground(textColor);
+        loginButton.setFocusPainted(false);
+        gbc.gridy++;
+        loginBox.add(loginButton, gbc);
 
         // Setup behavior telling the app how to switch between screens
         setCloseEvent(WindowStateEvent.SWITCH_STATE);
         setNextWindow(WindowStateName.MISSION_SELECT);
 
-        JButton loginButton = new JButton("Enter"); // Login button
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,7 +134,7 @@ public class Login extends WindowState {
 
                     String today = LocalDate.now().toString();
 
-                    if (!today.equals(PlayerData.lastLoginDate)){ // Check if the player alread received today's bonus
+                    if (!today.equals(PlayerData.lastLoginDate)){ // Check if the player already received today's bonus
                         PlayerData.xp += 50; // Give 50 XP
                         if (PlayerData.xp >= 1000) {
                             PlayerData.level++;
@@ -142,32 +159,45 @@ public class Login extends WindowState {
         });
         gbc.gridx = 0;
         gbc.gridy = 6;
-        getContentPane().add(loginButton, gbc);
+        loginBox.add(loginButton, gbc);
 
         // SIGN UP SCREEN
 
-        JTextField signUpUsernameField = new JTextField(); // Signup username text field
-        signUpUsernameField.setColumns(30);
+        labelFont = new Font("Helvetica", Font.PLAIN, 18);
+        textColor = new Color(124, 124, 124);
+        inputBg = new Color(220, 220, 220);
+
+        // Signup Username Field
+        JTextField signUpUsernameField = new JTextField();
+        signUpUsernameField.setFont(labelFont);
+        signUpUsernameField.setBackground(inputBg);
+        signUpUsernameField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        signUpUsernameField.setForeground(textColor);
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        signUpUsernameField.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(signUpUsernameField, gbc);
-        signUpUsernameField.setVisible(false); // Initially invisible until the to-sign-up button is pressed
+        loginBox.add(signUpUsernameField, gbc);
+        signUpUsernameField.setVisible(false);
 
-        JTextField signUpPasswordField = new JTextField(); // Signup password text field
-        signUpPasswordField.setColumns(30);
-        gbc.gridx = 0;
+        // Signup Password Field
+        JTextField signUpPasswordField = new JTextField();
+        signUpPasswordField.setFont(labelFont);
+        signUpPasswordField.setBackground(inputBg);
+        signUpPasswordField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        signUpPasswordField.setForeground(textColor);
         gbc.gridy = 5;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        signUpPasswordField.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(signUpPasswordField, gbc);
-        signUpPasswordField.setVisible(false); // Initially invisible until the to-sign-up button is pressed
+        loginBox.add(signUpPasswordField, gbc);
+        signUpPasswordField.setVisible(false);
 
-        JButton signUpButton = new JButton("Sign Up"); // Signup button
-        gbc.gridx = 0;
+        // Signup Button
+        JButton signUpButton = new JButton("Sign Up");
+        signUpButton.setFont(labelFont);
+        signUpButton.setBackground(new Color(168, 168, 168));
+        signUpButton.setForeground(textColor);
+        signUpButton.setFocusPainted(false);
         gbc.gridy = 6;
-        getContentPane().add(signUpButton, gbc);
+        loginBox.add(signUpButton, gbc);
+        signUpButton.setVisible(false);
+
         signUpButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String newUsername = new String(signUpUsernameField.getText());
@@ -189,7 +219,7 @@ public class Login extends WindowState {
         JButton toSignupButton = new JButton("Don't have an account? Sign up now."); // Sign up trigger button
         gbc.gridx = 0;
         gbc.gridy = 7;
-        getContentPane().add(toSignupButton, gbc);
+        loginBox.add(toSignupButton, gbc);
         toSignupButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Modifies visibility to switch from  log in screen to sign up screen
@@ -202,7 +232,6 @@ public class Login extends WindowState {
                 signUpButton.setVisible(true);
             }
         });
-//        getContentPane().setVisible(true);
     }
 
     @Override
@@ -310,25 +339,4 @@ public class Login extends WindowState {
         }
     }
 
-    // Discarded code: (ignore)
-    /*
-    public class UserDatabase {
-        private static Map<String, String> userDatabase = new HashMap<>(); // A static map that maps a String to another String
-        public static void addEntry(String newUsername, String newPassword) { // Used to add username and password entries to the UserDatabase map
-            if (userDatabase.containsKey(newUsername)) {
-                throw new RuntimeException("User already exists.");
-            } else {
-                userDatabase.put(newUsername, PasswordUtils.hashPassword(newPassword));
-            }
-        }
-        public static boolean authenticate(String username, String password) { // Verification Logic
-            if (userDatabase.containsKey(username)) { // Checks if the user exists
-                String storedHash = userDatabase.get(username);
-                String inputHash = PasswordUtils.hashPassword(password);
-                return storedHash.equals(inputHash); // Checks if the password matches
-            }
-            return false;  // Username not found
-        }
-    }
-    */
 }
