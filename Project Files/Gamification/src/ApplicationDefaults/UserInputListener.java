@@ -24,7 +24,6 @@ public class UserInputListener implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        System.out.println("pressed");
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             System.out.println("ESCAPE");
             if (windowState != null)

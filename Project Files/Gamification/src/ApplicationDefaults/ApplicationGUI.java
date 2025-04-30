@@ -4,6 +4,7 @@ import WindowStates.WindowStateName;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -80,6 +81,10 @@ public class ApplicationGUI {
         System.out.println("Taking state: " + state.getStateName().name());
         frame.setContentPane(state.getContentPane());
         frame.setVisible(true);
+        for (KeyListener listener : frame.getKeyListeners()) {
+            frame.removeKeyListener(listener);
+            frame.getContentPane().removeKeyListener(listener);
+        }
         frame.getContentPane().addKeyListener(inputListener);
         frame.getContentPane().requestFocusInWindow();
         frame.addKeyListener(inputListener);
