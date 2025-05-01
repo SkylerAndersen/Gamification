@@ -151,7 +151,13 @@ public class Character extends WindowState {
 
     @Override
     public void save(FileHandler fileHandler) {
-        // no-op
+        String key = PlayerData.name + "-equipped-items";
+        String[] eqArray = new String[equippedItems.size()];
+        for (int i = 0; i < equippedItems.size(); i++) {
+            eqArray[i] = equippedItems.get(i).getCharacterLookName();
+        }
+        fileHandler.save(key, eqArray);
+        PlayerData.save(fileHandler);
     }
 
     @Override
@@ -183,6 +189,19 @@ public class Character extends WindowState {
             inventory.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
         // load icons
         for (GenericItem item : inventory) item.load(fileHandler);
+
+        // pulling equipped items from playerData
+        equippedItems.clear();
+        String[] savedEquipped = fileHandler.retrieveStringArray(PlayerData.name + "-equipped-items");
+        for (String lookName : savedEquipped) {
+            for (GenericItem item : inventory) {
+                if (item.getCharacterLookName().equals(lookName)) {
+                    equippedItems.add(item);
+                    break;
+                }
+            }
+        }
+
 
         // 2) Update character display (base + equipped items)
         updateCharacterDisplay();
