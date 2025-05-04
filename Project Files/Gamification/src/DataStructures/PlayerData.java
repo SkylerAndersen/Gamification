@@ -7,6 +7,7 @@ public class PlayerData {
     public static int level = 1;
     public static int xp = 0;
 
+
     public static String currentUser = null;
 
     public static String lastLoginDate = "";
