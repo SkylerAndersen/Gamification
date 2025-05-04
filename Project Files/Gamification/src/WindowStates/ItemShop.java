@@ -14,32 +14,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ItemShop extends WindowState implements AcceptMouseResponse {
-    private JPanel popup;
-    private boolean popupOpen;
+    private JPanel popup, cart, cartContent, total, background, row, row2, grid, inventoryGrid, coins, coinWrapper;
+    private boolean popupOpen, shopView, confirmDialog;
+    private int runningTotalCart, purse;
     private MouseController mouseController;
-    private ResizeListener headerListener;
-    private ResizeListener contentListener;
-    private JPanel cart;
-    private JPanel cartContent;
-    private JPanel total;
+    private ResizeListener headerListener, contentListener;
     private JFrame parentFrame;
-    private JPanel background;
-    private JPanel row;
-    private JPanel row2;
-    private ResizeListener rowResize;
-    private ResizeListener rowResize2;
-    private boolean shopView;
-    private ArrayList<GenericItem> cartItems;
-    private ArrayList<GenericItem> shopItems;
-    private ArrayList<GenericItem> inventoryItems;
-    private int runningTotalCart;
-    private int purse;
-    private boolean confirmDialog;
+    private ResizeListener rowResize, rowResize2;
+    private ArrayList<GenericItem> cartItems, shopItems, inventoryItems;
     private Dimension dialogControl;
-    private JPanel grid;
-    private JPanel inventoryGrid;
-    private JPanel coins;
-    private JPanel coinWrapper;
+    private static final int BOW_COST = 100, SWORD_COST = 200, DUAL_SWORD_COST = 400, HELMET_COST = 600,
+    CHESTPLATE_COST = 900, LEGGINGS_COST = 900;
 
     public ItemShop(JFrame parentFrame) {
         // setup frame
@@ -896,27 +881,27 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
 
         // initialize items available for purchase
         if (!hasLoaded) { // setup defaults
-            shopItems.add(new GenericItem("Bow", 5, "shop-bow", "bow"));
-            shopItems.add(new GenericItem("Sword", 10, "shop-single-sword", "single-sword"));
-            shopItems.add(new GenericItem("Dual Sword", 15, "shop-dual-sword", "dual-sword"));
-            shopItems.add(new GenericItem("Helmet", 20, "shop-helmet", "helmet"));
-            shopItems.add(new GenericItem("Chestplate", 25, "shop-chestplate", "chestplate"));
-            shopItems.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
+            shopItems.add(new GenericItem("Bow", BOW_COST, "shop-bow", "bow"));
+            shopItems.add(new GenericItem("Sword", SWORD_COST, "shop-single-sword", "single-sword"));
+            shopItems.add(new GenericItem("Dual Sword", DUAL_SWORD_COST, "shop-dual-sword", "dual-sword"));
+            shopItems.add(new GenericItem("Helmet", HELMET_COST, "shop-helmet", "helmet"));
+            shopItems.add(new GenericItem("Chestplate", CHESTPLATE_COST, "shop-chestplate", "chestplate"));
+            shopItems.add(new GenericItem("Leggings", LEGGINGS_COST, "shop-leggings", "leggings"));
         } else { // load previous shop items
             String[] array = fileHandler.retrieveStringArray(PlayerData.name + "-shop-items");
             Set<String> availableItems = Arrays.stream(array).collect(Collectors.toSet());
             if (availableItems.contains("bow"))
-                shopItems.add(new GenericItem("Bow", 5, "shop-bow", "bow"));
+                shopItems.add(new GenericItem("Bow", BOW_COST, "shop-bow", "bow"));
             if (availableItems.contains("single-sword"))
-                shopItems.add(new GenericItem("Sword", 10, "shop-single-sword", "single-sword"));
+                shopItems.add(new GenericItem("Sword", SWORD_COST, "shop-single-sword", "single-sword"));
             if (availableItems.contains("dual-sword"))
-                shopItems.add(new GenericItem("Dual Sword", 15, "shop-dual-sword", "dual-sword"));
+                shopItems.add(new GenericItem("Dual Sword", DUAL_SWORD_COST, "shop-dual-sword", "dual-sword"));
             if (availableItems.contains("helmet"))
-                shopItems.add(new GenericItem("Helmet", 20, "shop-helmet", "helmet"));
+                shopItems.add(new GenericItem("Helmet", HELMET_COST, "shop-helmet", "helmet"));
             if (availableItems.contains("chestplate"))
-                shopItems.add(new GenericItem("Chestplate", 25, "shop-chestplate", "chestplate"));
+                shopItems.add(new GenericItem("Chestplate", CHESTPLATE_COST, "shop-chestplate", "chestplate"));
             if (availableItems.contains("leggings"))
-                shopItems.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
+                shopItems.add(new GenericItem("Leggings", LEGGINGS_COST, "shop-leggings", "leggings"));
         }
 
         // initialize items in inventory
@@ -924,17 +909,17 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
             String[] array = fileHandler.retrieveStringArray(PlayerData.name + "-inventory-items");
             Set<String> availableItems = Arrays.stream(array).collect(Collectors.toSet());
             if (availableItems.contains("bow"))
-                inventoryItems.add(new GenericItem("Bow", 5, "shop-bow", "bow"));
+                inventoryItems.add(new GenericItem("Bow", BOW_COST, "shop-bow", "bow"));
             if (availableItems.contains("single-sword"))
-                inventoryItems.add(new GenericItem("Sword", 10, "shop-single-sword", "single-sword"));
+                inventoryItems.add(new GenericItem("Sword", SWORD_COST, "shop-single-sword", "single-sword"));
             if (availableItems.contains("dual-sword"))
-                inventoryItems.add(new GenericItem("Dual Sword", 15, "shop-dual-sword", "dual-sword"));
+                inventoryItems.add(new GenericItem("Dual Sword", DUAL_SWORD_COST, "shop-dual-sword", "dual-sword"));
             if (availableItems.contains("helmet"))
-                inventoryItems.add(new GenericItem("Helmet", 20, "shop-helmet", "helmet"));
+                inventoryItems.add(new GenericItem("Helmet", HELMET_COST, "shop-helmet", "helmet"));
             if (availableItems.contains("chestplate"))
-                inventoryItems.add(new GenericItem("Chestplate", 25, "shop-chestplate", "chestplate"));
+                inventoryItems.add(new GenericItem("Chestplate", CHESTPLATE_COST, "shop-chestplate", "chestplate"));
             if (availableItems.contains("leggings"))
-                inventoryItems.add(new GenericItem("Leggings", 30, "shop-leggings", "leggings"));
+                inventoryItems.add(new GenericItem("Leggings", LEGGINGS_COST, "shop-leggings", "leggings"));
         }
 
         // update UI

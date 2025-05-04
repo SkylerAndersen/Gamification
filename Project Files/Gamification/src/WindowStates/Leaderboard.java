@@ -2,9 +2,20 @@ package WindowStates;
 
 import ApplicationDefaults.*;
 import DataStructures.FileHandler;
+import DataStructures.PlayerData;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import javax.swing.Timer;
 
 public class Leaderboard extends WindowState implements AcceptMouseResponse {
     private JFrame parentFrame;
@@ -14,6 +25,8 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
     private ResizeListener headerListener;
     private ResizeListener contentListener;
     private JPanel cart;
+    private JPanel content;
+    private FileHandler fileHandler;
     public Leaderboard(JFrame parentFrame) {
         // setup frame
         super(WindowStateName.LEADERBOARD);
@@ -65,6 +78,76 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         }
     }
 
+    private void resetContent () {
+        // save current users data
+        PlayerData.save(fileHandler);
+        String loggedInUser = PlayerData.currentUser;
+        int loggedInUserBalance = PlayerData.xp;
+
+        // reset content area
+        content.removeAll();
+        content.setLayout(new BoxLayout(content,BoxLayout.Y_AXIS));
+
+        // find all local usernames and xp per user
+        String[] localUsernames = getOtherLocalUsernames();
+        HashMap<String,Integer> balance = new HashMap<>();
+        balance.put(loggedInUser,loggedInUserBalance);
+        for (String user : localUsernames) {
+            PlayerData.currentUser = user;
+            PlayerData.load(fileHandler);
+            balance.put(user,PlayerData.xp);
+        }
+
+        // sort all users before adding to leaderboard
+        String[] sorted = balance.keySet().toArray(new String[0]);
+        for (int i = 0; i < sorted.length-1; i++) {
+            int maxIndex = i;
+            for (int j = i+1; j < sorted.length; j++) {
+                if (balance.get(sorted[j]) > balance.get(sorted[maxIndex]))
+                    maxIndex = j;
+            }
+            String temp = sorted[i];
+            sorted[i] = sorted[maxIndex];
+            sorted[maxIndex] = temp;
+        }
+
+        // add users to leaderboard
+        for (int i = 0; i < sorted.length; i++) {
+            content.add(tableEntry(""+(i+1),sorted[i],""+balance.get(sorted[i])));
+        }
+
+        // refresh and re-login
+        content.repaint();
+        content.revalidate();
+        Timer delay = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                PlayerData.currentUser = loggedInUser;
+                PlayerData.load(fileHandler);
+            }
+        });
+        delay.setRepeats(false);
+        delay.start();
+    }
+
+    private String[] getOtherLocalUsernames () {
+        String path = Paths.get(System.getProperty("user.dir"),"resources",
+                "user_database.bin").toString();
+        ArrayList<String> output = new ArrayList<>();
+        try (RandomAccessFile raf = new RandomAccessFile(path, "r")) {
+            long fileLength = raf.length();
+            while (raf.getFilePointer() < fileLength) {
+                byte[] nameBytes = new byte[raf.readInt()];
+                raf.read(nameBytes);
+                String name = new String(nameBytes);
+                if (!name.equals(PlayerData.currentUser))
+                    output.add(name);
+                raf.skipBytes(raf.readInt());
+            }
+        } catch (IOException e) { e.printStackTrace(); }
+        return output.toArray(new String[0]);
+    }
+
     public JPanel setupUI () {
         JPanel background = new JPanel();
         background.setLayout(new BorderLayout());
@@ -99,10 +182,15 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         leaderboardHeader.setLayout(new BorderLayout());
         leaderboardArea.add(leaderboardHeader,BorderLayout.NORTH);
 
-        JPanel content = new JPanel();
+        content = new JPanel();
         content.setBackground(new Color(201,201,201));
         content.setLayout(new BoxLayout(content,BoxLayout.Y_AXIS));
-        leaderboardArea.add(content,BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(content);
+        scrollPane.setBackground(new Color(0,0,0,0));
+        scrollPane.setOpaque(false);
+        scrollPane.setBorder(null);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        leaderboardArea.add(scrollPane,BorderLayout.CENTER);
 
         BevelPanel leaderboardFooter = new BevelPanel();
         leaderboardFooter.setRoundBottom(true);
@@ -129,6 +217,13 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         addPlayer.setRoundBottom(true);
         addPlayer.setBackground(new Color(175,175,175));
         addPlayerWrapper.add(addPlayer);
+        addPlayer.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                JOptionPane.showMessageDialog(null,"Online friends are not currently supported." +
+                        " Check back later.");
+            }
+        });
 
         // add text to header
         JLabel title = new JLabel("Leaderboard");
@@ -179,7 +274,7 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         label3.setHorizontalAlignment(SwingConstants.RIGHT);
         label3.setForeground(textColor);
         label3.setFont(font);
-        label3.setBorder(BorderFactory.createEmptyBorder(0,0,0,30));
+        label3.setBorder(BorderFactory.createEmptyBorder(0,0,0,80));
 
         entry.add(label1,BorderLayout.WEST);
         entry.add(label2,BorderLayout.CENTER);
@@ -187,8 +282,9 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         JPanel coins = new JPanel();
         coins.setOpaque(false);
         coins.setLayout(new BorderLayout());
-        coins.setPreferredSize(new Dimension(100,50));
-        coins.setMaximumSize(new Dimension(100,50));
+        coins.setPreferredSize(new Dimension(200,50));
+        coins.setMaximumSize(new Dimension(200,50));
+        coins.setMinimumSize(new Dimension(200,50));
         int num = -1;
         try { num = Integer.parseInt(item3); } catch (Exception e) {}
         if (num == -1) {
@@ -227,5 +323,7 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
 
     @Override
     public void load(FileHandler fileHandler) {
+        this.fileHandler = fileHandler;
+        resetContent();
     }
 }
