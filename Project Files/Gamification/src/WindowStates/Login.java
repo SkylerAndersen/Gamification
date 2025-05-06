@@ -1,5 +1,6 @@
 package WindowStates;
 
+import ApplicationDefaults.ApplicationGUI;
 import ApplicationDefaults.BevelPanel;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
@@ -42,7 +43,7 @@ public class Login extends WindowState {
         loginBox.setRoundTop(true);
         loginBox.setRoundBottom(true);
         loginBox.setRounding(30);
-        loginBox.setBackground(new Color(201, 201, 201));
+        loginBox.setBackground(ApplicationGUI.accentColor(new Color(201, 201, 201)));
         loginBox.setOpaque(true);
         loginBox.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
@@ -78,7 +79,7 @@ public class Login extends WindowState {
         // Username Field
         JTextField usernameField = new JTextField();
         usernameField.setFont(labelFont);
-        usernameField.setBackground(inputBg);
+        usernameField.setBackground(ApplicationGUI.accentColor(inputBg));
         usernameField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         gbc.gridy++;
         loginBox.add(usernameField, gbc);
@@ -98,7 +99,7 @@ public class Login extends WindowState {
         // Password Field
         JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(labelFont);
-        passwordField.setBackground(inputBg);
+        passwordField.setBackground(ApplicationGUI.accentColor(inputBg));
         passwordField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         gbc.gridy++;
         loginBox.add(passwordField, gbc);
@@ -170,7 +171,7 @@ public class Login extends WindowState {
         // Signup Username Field
         JTextField signUpUsernameField = new JTextField();
         signUpUsernameField.setFont(labelFont);
-        signUpUsernameField.setBackground(inputBg);
+        signUpUsernameField.setBackground(ApplicationGUI.accentColor(inputBg));
         signUpUsernameField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         signUpUsernameField.setForeground(textColor);
         gbc.gridx = 0;
@@ -181,7 +182,7 @@ public class Login extends WindowState {
         // Signup Password Field
         JTextField signUpPasswordField = new JTextField();
         signUpPasswordField.setFont(labelFont);
-        signUpPasswordField.setBackground(inputBg);
+        signUpPasswordField.setBackground(ApplicationGUI.accentColor(inputBg));
         signUpPasswordField.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         signUpPasswordField.setForeground(textColor);
         gbc.gridy = 5;

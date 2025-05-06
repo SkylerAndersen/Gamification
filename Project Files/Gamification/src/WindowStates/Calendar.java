@@ -211,7 +211,7 @@ public class Calendar extends WindowState implements AcceptMouseResponse {
         background.add(calendar);
 
         // setup calendar header
-        calendarHeader.setBackground(new Color(220,220,220));
+        calendarHeader.setBackground(ApplicationGUI.accentColor(new Color(220,220,220)));
         calendarHeader.setPreferredSize(new Dimension(1000,35));
         calendarHeader.setMaximumSize(new Dimension(1000,35));
         calendarHeader.setMinimumSize(new Dimension(500,35));

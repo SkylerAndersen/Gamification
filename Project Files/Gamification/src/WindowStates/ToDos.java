@@ -1,5 +1,6 @@
 package WindowStates;
 
+import ApplicationDefaults.ApplicationGUI;
 import ApplicationDefaults.BevelPanel;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
@@ -56,7 +57,7 @@ public class ToDos extends WindowState {
 
         // Tasklist header
         BevelPanel taskLabelPanel = new BevelPanel();
-        taskLabelPanel.setBackground(new Color(220,220,220));
+        taskLabelPanel.setBackground(ApplicationGUI.accentColor(new Color(220,220,220)));
         taskLabelPanel.setPreferredSize(new Dimension(250,30));
         taskLabelPanel.setRoundTop(true);
         taskLabelPanel.setRoundBottom(true);
@@ -83,7 +84,7 @@ public class ToDos extends WindowState {
 
         // Finished list header
         BevelPanel finishedLabelPanel = new BevelPanel();
-        finishedLabelPanel.setBackground(new Color(220,220,220));
+        finishedLabelPanel.setBackground(ApplicationGUI.accentColor(new Color(220,220,220)));
         finishedLabelPanel.setPreferredSize(new Dimension(250,30));
         finishedLabelPanel.setRoundTop(true);
         finishedLabelPanel.setRoundBottom(true);

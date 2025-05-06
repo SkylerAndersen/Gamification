@@ -219,7 +219,7 @@ public class ItemShop extends WindowState implements AcceptMouseResponse {
         // setting up header
         header.setLayout(new FlowLayout());
         header.setRoundBottom(true);
-        header.setBackground(new Color(201,201,201));
+        header.setBackground(ApplicationGUI.accentColor(new Color(201,201,201)));
         header.setPreferredSize(new Dimension(400,100));
         header.setMinimumSize(new Dimension(200,100));
         header.setMaximumSize(new Dimension(600,100));

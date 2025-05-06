@@ -1,5 +1,6 @@
 package WindowStates;
 
+import ApplicationDefaults.ApplicationGUI;
 import ApplicationDefaults.BevelPanel;
 import ApplicationDefaults.WindowState;
 import ApplicationDefaults.WindowStateEvent;
@@ -23,7 +24,7 @@ public class MissionSelect extends WindowState {
         BevelPanel headerPanel = new BevelPanel();
         headerPanel.setRoundTop(true);
         headerPanel.setRoundBottom(true);
-        headerPanel.setBackground(new Color(201, 201, 201));
+        headerPanel.setBackground(ApplicationGUI.accentColor(new Color(201, 201, 201)));
         headerPanel.setPreferredSize(new Dimension(800, 100));
         headerPanel.setLayout(new BorderLayout());
 

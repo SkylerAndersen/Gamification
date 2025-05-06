@@ -16,6 +16,7 @@ public class ApplicationGUI {
     private JFrame frame;
     private WindowStateName activeState;
     private UserInputListener inputListener;
+    private static final Color accentColor = Color.GREEN;
     /**
      * Setup the object with a notifier for multithreaded communication, but don't create the JFrame.
      * @param notifier multithreaded notifier that can communicate with DebugHandler and WindowStateManager.
@@ -45,6 +46,7 @@ public class ApplicationGUI {
             }
         });
         frame.setVisible(true);
+        frame.setMinimumSize(new Dimension(800,700));
         debug.notify(WindowStateEvent.START_APP);
         System.out.println("Starting App.");
     }
@@ -99,5 +101,14 @@ public class ApplicationGUI {
     public synchronized void close () {
         frame.setVisible(false);
         frame.dispose();
+    }
+
+    public static Color accentColor (Color original) {
+        double opacity = 0.02;
+        Color reference = (original != null) ? original : accentColor;
+        int red = (int)(reference.getRed()*(1-opacity)+accentColor.getRed()*opacity);
+        int green = (int)(reference.getGreen()*(1-opacity)+accentColor.getGreen()*opacity);
+        int blue = (int)(reference.getBlue()*(1-opacity)+accentColor.getBlue()*opacity);
+        return new Color(red,green,blue);
     }
 }

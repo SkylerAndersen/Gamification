@@ -160,7 +160,7 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
 
         BevelPanel header = new BevelPanel();
         header.setRoundBottom(true);
-        header.setBackground(new Color(201,201,201));
+        header.setBackground(ApplicationGUI.accentColor(new Color(201,201,201)));
         header.setPreferredSize(new Dimension(400,100));
         header.setMinimumSize(new Dimension(200,100));
         header.setMaximumSize(new Dimension(600,100));
@@ -176,7 +176,7 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         BevelPanel leaderboardHeader = new BevelPanel();
         leaderboardHeader.setRoundTop(true);
         leaderboardHeader.setRounding(300);
-        leaderboardHeader.setBackground(new Color(175,175,175));
+        leaderboardHeader.setBackground(ApplicationGUI.accentColor(new Color(175,175,175)));
         parentFrame.addComponentListener(new RoundingResize(leaderboardHeader,300,1200,800,leaderboardArea));
         leaderboardHeader.setPreferredSize(new Dimension(100,80));
         leaderboardHeader.setLayout(new BorderLayout());
@@ -215,7 +215,7 @@ public class Leaderboard extends WindowState implements AcceptMouseResponse {
         BevelPanel addPlayer = new BevelPanel();
         addPlayer.setRoundTop(true);
         addPlayer.setRoundBottom(true);
-        addPlayer.setBackground(new Color(175,175,175));
+        addPlayer.setBackground(ApplicationGUI.accentColor(new Color(175,175,175)));
         addPlayerWrapper.add(addPlayer);
         addPlayer.addMouseListener(new MouseAdapter() {
             @Override
